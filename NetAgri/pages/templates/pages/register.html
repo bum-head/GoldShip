@@ -1,0 +1,26 @@
+{% extends "pages/base.html" %}
+
+{% block title %}Register | NetAgri{% endblock %}
+
+{% block content %}
+    <section class="content-section">
+        <h1>Create an account</h1>
+
+        <p>Join NetAgri to get started.</p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button class="button" type="submit">
+                Register
+            </button>
+        </form>
+
+        <p>
+            Already have an account?
+            <a href="{% url 'login' %}">Log in</a>
+        </p>
+    </section>
+{% endblock %}
