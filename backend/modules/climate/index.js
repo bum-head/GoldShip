@@ -27,11 +27,15 @@ module.exports = {
   ],
 
 
-  // Local module health check. Does not make external network requests.
-  health: async () => {
-    return {
-      ok: true,
-      detail: "Climate module available",
-    };
-  },
-  
+ // Used by the dashboard: can we reach the weather API right now?
+health: async () => {
+  const w = normalizeWeather(await fetchRawWeather({
+    lat: DEFAULT_LAT,
+    lon: DEFAULT_LON
+  }));
+
+  return {
+    ok: true,
+    detail: `Weather API reachable (${w.temperature} °C at default location)`
+  };
+},
