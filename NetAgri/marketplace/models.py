@@ -5,15 +5,17 @@ from django.db import models
 
 class Region(models.Model):
     name = models.CharField(max_length=100)
-    district = models.CharField(max_length=100)
-    state = models.CharField(
-        max_length=100,
-        default="Assam",
-    )
+    district = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, default="Assam")
+    latitude = models.DecimalField(max_digits=8, decimal_places=5, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=8, decimal_places=5, null=True, blank=True)
+
+    class Meta:
+        ordering = ["state", "name"]
 
     def __str__(self):
-        return f"{self.name}, {self.district}"
-
+        place = self.district or self.state
+        return f"{self.name}, {place}"
 
 class CropListing(models.Model):
     STATUS_CHOICES = [

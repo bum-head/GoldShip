@@ -2,9 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from .forms import CropListingForm
-from django.shortcuts import render
-
-from .models import CropListing
+from .models import CropListing, Region
 
 
 def crop_list(request):
@@ -14,11 +12,20 @@ def crop_list(request):
         .select_related("region", "seller")
     )
 
-    return render(
-        request,
-        "marketplace/crop_list.html",
-        {"listings": listings},
-    )
+    selected = request.GET.get("region", "")
+    if selected.isdigit():
+        listings = listings.filter(region_id=int(selected))
+
+    q = request.GET.get("q", "").strip()
+    if q:
+        listings = listings.filter(crop_name__icontains=q)
+
+    return render(request, "marketplace/crop_list.html", {
+        "listings": listings,
+        "regions": Region.objects.all(),
+        "selected": selected,
+        "q": q,
+    })
 
 
 @login_required
@@ -30,13 +37,8 @@ def create_listing(request):
             listing = form.save(commit=False)
             listing.seller = request.user
             listing.save()
-
             return redirect("marketplace:crop_list")
     else:
         form = CropListingForm()
 
-    return render(
-        request,
-        "marketplace/listing_form.html",
-        {"form": form},
-    )
+    return render(request, "marketplace/listing_form.html", {"form": form})
