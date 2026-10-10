@@ -260,3 +260,7 @@ nav a:hover {
         grid-template-columns: 1fr;
     }
 }
+.container.wide {
+    width: min(1120px, 92%);
+    margin-top: 36px;
+}

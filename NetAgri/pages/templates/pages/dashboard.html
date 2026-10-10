@@ -1,0 +1,161 @@
+{% extends "pages/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard | NetAgri{% endblock %}
+{% block main_class %}wide{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="{% static 'pages/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div id="dash" class="dash" data-state="no-location">
+
+    <!-- ───────── Header: where am I? ───────── -->
+    <section class="dash-head">
+        <div>
+            <p class="eyebrow">YOUR FARM DASHBOARD</p>
+            <h1 class="dash-title">Weather &amp; climate watch</h1>
+        </div>
+
+        <div class="loc-chip" id="loc-chip" hidden>
+            <span class="loc-text">
+                <strong id="loc-label">—</strong>
+                <small id="loc-meta"></small>
+            </span>
+            <button type="button" class="link-btn" id="loc-change">Change</button>
+        </div>
+    </section>
+
+    <!-- ───────── Location setup (shown until a location is chosen) ───────── -->
+    <section class="card loc-setup" id="loc-setup" aria-labelledby="loc-setup-title">
+        <h2 id="loc-setup-title">Where are you farming?</h2>
+        <p class="muted">
+            We use your location to show local weather and warn you about rain and floods.
+            Your location is saved only on this device. It is sent to the weather service
+            (Open-Meteo) to fetch your forecast, and nowhere else.
+        </p>
+
+        <div class="loc-actions">
+            <button type="button" class="button" id="btn-gps">Use my current location</button>
+            <span class="or">or choose</span>
+            <div class="picker">
+                <label class="sr-only" for="sel-state">State</label>
+                <select id="sel-state"><option value="">State…</option></select>
+                <label class="sr-only" for="sel-place">Town / district</label>
+                <select id="sel-place" disabled><option value="">District…</option></select>
+                <button type="button" class="button button-ghost" id="btn-pick" disabled>Show weather</button>
+            </div>
+        </div>
+        <p class="loc-msg" id="loc-msg" role="status" aria-live="polite"></p>
+    </section>
+
+    <div id="notices" role="status" aria-live="polite"></div>
+
+    <!-- ───────── Alerts ───────── -->
+    <section id="alerts" class="alerts" aria-live="polite" aria-label="Weather alerts"></section>
+
+    <!-- ───────── Main dashboard (hidden until we have data) ───────── -->
+    <div class="dash-body" id="dash-body" hidden>
+
+        <div class="status-row">
+            <span id="updated" class="muted small"></span>
+            <button type="button" class="link-btn" id="btn-refresh">↻ Refresh</button>
+            <button type="button" class="link-btn" id="btn-notify" hidden>🔔 Turn on alert notifications</button>
+        </div>
+
+        <div class="grid">
+            <!-- Current conditions -->
+            <article class="card now" aria-label="Current conditions">
+                <div class="now-main">
+                    <div class="now-icon" id="now-icon" aria-hidden="true">—</div>
+                    <div>
+                        <div class="now-temp"><span id="now-temp">--</span><sup>°C</sup></div>
+                        <div class="now-desc" id="now-desc">—</div>
+                        <div class="muted small">Feels like <span id="now-feels">--</span>°C</div>
+                    </div>
+                </div>
+                <dl class="stats">
+                    <div class="stat">
+                        <dt>Temperature</dt>
+                        <dd><span id="st-temp">--</span>°C</dd>
+                        <div class="range small muted">Today <span id="st-lo">--</span>° / <span id="st-hi">--</span>°</div>
+                    </div>
+                    <div class="stat">
+                        <dt>Humidity</dt>
+                        <dd><span id="st-hum">--</span>%</dd>
+                        <div class="meter" role="presentation"><i id="st-hum-bar"></i></div>
+                    </div>
+                    <div class="stat">
+                        <dt>Rain now</dt>
+                        <dd><span id="st-rain">--</span> mm</dd>
+                        <div class="small muted">last hour</div>
+                    </div>
+                    <div class="stat">
+                        <dt>Wind</dt>
+                        <dd><span id="st-wind">--</span> km/h</dd>
+                        <div class="small muted">gusts <span id="st-gust">--</span></div>
+                    </div>
+                </dl>
+            </article>
+
+            <!-- Collapsible minimap -->
+            <article class="card minimap" aria-label="Map">
+                <div class="card-head">
+                    <h2>Your location</h2>
+                    <button type="button" class="link-btn" id="map-toggle"
+                            aria-expanded="true" aria-controls="map-wrap">Hide map ▴</button>
+                </div>
+                <div id="map-wrap" class="map-wrap">
+                    <div id="map" role="application" aria-label="Map of your location. Drag the marker to adjust."></div>
+                    <p class="muted small map-hint">Drag the marker to fine-tune your location.</p>
+                </div>
+            </article>
+
+            <!-- Risk summary -->
+            <article class="card risk" aria-label="Rain and flood outlook">
+                <h2>Next 72 hours</h2>
+                <div class="risk-grid">
+                    <div class="risk-item"><span class="big" id="r-24">--</span><span class="small muted">mm rain<br>next 24 h</span></div>
+                    <div class="risk-item"><span class="big" id="r-72">--</span><span class="small muted">mm rain<br>next 72 h</span></div>
+                    <div class="risk-item"><span class="big" id="r-prob">--</span><span class="small muted">% peak chance<br>of rain</span></div>
+                </div>
+                <div class="outlook" id="outlook"></div>
+                <div class="small muted" id="river-line"></div>
+            </article>
+
+            <!-- Hourly rain chart -->
+            <article class="card hourly" aria-label="Hourly rainfall forecast">
+                <div class="card-head">
+                    <h2>Rainfall, next 48 hours</h2>
+                    <span class="small muted" id="hourly-peak"></span>
+                </div>
+                <div id="hourly-chart" class="hourly-chart"></div>
+            </article>
+
+            <!-- 7-day -->
+            <article class="card week" aria-label="7-day forecast">
+                <h2>7-day forecast</h2>
+                <ol class="days" id="days"></ol>
+            </article>
+        </div>
+
+        <p class="small muted fineprint">
+            Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
+            (river flow: GloFAS via Open-Meteo). Alerts are automatic, model-based estimates and are
+            <strong>not</strong> official warnings &mdash; always follow IMD, CWC and your state disaster authority.
+        </p>
+    </div>
+
+    <noscript><p class="card">The dashboard needs JavaScript to read your location and load the forecast.</p></noscript>
+</div>
+
+{{ ner|json_script:"ner-data" }}
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{% static 'pages/climate.js' %}"></script>
+    <script src="{% static 'pages/dashboard.js' %}"></script>
+{% endblock %}
