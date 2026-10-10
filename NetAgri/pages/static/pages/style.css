@@ -90,3 +90,151 @@ nav a:hover {
     border-top: 1px solid #e2e8df;
 }
 
+.hero {
+    padding: 60px 0 70px;
+    max-width: 720px;
+}
+
+.hero h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    margin: 20px 0;
+}
+
+.hero-description {
+    max-width: 600px;
+    font-size: 1.1rem;
+    color: #58665b;
+}
+
+.problems {
+    padding: 40px 0;
+}
+
+.problems h2,
+.next-section h2 {
+    color: #204e34;
+    margin-bottom: 24px;
+}
+
+.problem-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.problem-card {
+    padding: 24px;
+    background: white;
+    border: 1px solid #e2e8df;
+    border-radius: 12px;
+}
+
+.problem-card h3 {
+    color: #267447;
+    margin-top: 0;
+}
+
+.problem-card p {
+    color: #58665b;
+    margin-bottom: 0;
+}
+
+.next-section {
+    margin: 40px 0;
+    padding: 30px;
+    background: #e9f1e7;
+    border-radius: 12px;
+}
+
+.next-section a {
+    color: #267447;
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .hero {
+        padding: 30px 0 40px;
+    }
+
+    .problem-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .next-section {
+        padding: 20px;
+    }
+}
+
+.about-intro {
+    max-width: 720px;
+    padding: 40px 0;
+}
+
+.about-intro h1 {
+    font-size: clamp(2.3rem, 5vw, 3.5rem);
+    line-height: 1.15;
+    letter-spacing: -1px;
+    color: #204e34;
+}
+
+.about-lead {
+    font-size: 1.15rem;
+    color: #58665b;
+    max-width: 650px;
+}
+
+.about-section {
+    margin: 48px 0;
+    max-width: 800px;
+}
+
+.about-section h2,
+.status-note h2 {
+    color: #204e34;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.about-card {
+    background: white;
+    border: 1px solid #e2e8df;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.about-card h3 {
+    color: #267447;
+    margin-top: 0;
+}
+
+.about-card p {
+    color: #58665b;
+}
+
+.status-note {
+    margin: 48px 0;
+    padding: 28px;
+    background: #e9f1e7;
+    border-radius: 12px;
+}
+
+@media (max-width: 650px) {
+    .about-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-intro {
+        padding: 24px 0;
+    }
+
+    .status-note {
+        padding: 20px;
+    }
+}
+

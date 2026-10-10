@@ -3,17 +3,71 @@
 {% block title %}Home | NetAgri{% endblock %}
 
 {% block content %}
-    <section class="hero">
-        <p class="eyebrow">WELCOME TO NETAGRI</p>
-        <h1>A better way to connect agriculture.</h1>
-        <p>
-            We're building a platform to help farmers,
-            buyers, and agricultural communities connect.
-        </p>
 
-        <a class="button" href="{% url 'about' %}">
-            Learn about us
-        </a>
-    </section>
+<section class="hero">
+    <p class="eyebrow">AGRICULTURE · CONNECTIVITY · INFORMATION</p>
+
+    <h1>Building better connections for agriculture.</h1>
+
+    <p class="hero-description">
+        NetAgri is a project aimed at helping farming communities
+        access agricultural information and connect with buyers
+        and local services.
+    </p>
+
+    <a class="button" href="{% url 'about' %}">
+        Learn about NetAgri
+    </a>
+</section>
+
+<section class="problems">
+    <h2>What are we trying to solve?</h2>
+
+    <div class="problem-grid">
+        <article class="problem-card">
+            <h3>Agricultural productivity</h3>
+            <p>
+                Make useful farming information and cultivation
+                guidance easier to access.
+            </p>
+        </article>
+
+        <article class="problem-card">
+            <h3>Climate uncertainty</h3>
+            <p>
+                Make relevant weather information and agricultural
+                advisories easier to find.
+            </p>
+        </article>
+
+        <article class="problem-card">
+            <h3>Post-harvest losses</h3>
+            <p>
+                Explore ways to connect farmers with storage
+                resources and information about crop handling.
+            </p>
+        </article>
+
+        <article class="problem-card">
+            <h3>Market connectivity</h3>
+            <p>
+                Help farmers and buyers discover opportunities
+                to connect within their regions.
+            </p>
+        </article>
+    </div>
+</section>
+
+<section class="next-section">
+    <h2>A platform in development</h2>
+
+    <p>
+        NetAgri is currently under development. These are the
+        problems the project aims to address; its agricultural
+        and marketplace features are not yet implemented.
+    </p>
+
+    <a href="{% url 'about' %}">Read about the project →</a>
+</section>
+
 {% endblock %}
-
