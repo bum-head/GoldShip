@@ -1,29 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "pages/base.html" %}
 
-    <title>NetAgri</title>
+{% block title %}Home | NetAgri{% endblock %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 100px auto;
-            padding: 20px;
-            background: #f4f7f2;
-            color: #263528;
-        }
+{% block content %}
+    <section class="hero">
+        <p class="eyebrow">WELCOME TO NETAGRI</p>
+        <h1>A better way to connect agriculture.</h1>
+        <p>
+            We're building a platform to help farmers,
+            buyers, and agricultural communities connect.
+        </p>
 
-        h1 {
-            color: #267447;
-        }
-    </style>
-</head>
-<body>
-    <h1>Welcome to NetAgri</h1>
+        <a class="button" href="{% url 'about' %}">
+            Learn about us
+        </a>
+    </section>
+{% endblock %}
 
-    <p>Welcome to our agricultural platform.</p>
-</body>
-</html>
