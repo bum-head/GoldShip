@@ -1,8 +1,13 @@
 {
   "name": "goldship-backend",
   "version": "1.0.0",
-  "description": "Modular backend: drop a folder into modules/ and it is loaded automatically.",
+  "description": "Modular backend",
   "main": "server.js",
-  "scripts": { "start": "node server.js" },
-  "engines": { "node": ">=18" }
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
 }

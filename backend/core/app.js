@@ -127,6 +127,7 @@ async function createApp() {
       sendJson(res, 500, { error: "Internal server error" });
     }
   };
+}
 
 
 module.exports = { createApp };
