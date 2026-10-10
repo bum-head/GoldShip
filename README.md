@@ -2,110 +2,179 @@
 
 ### SLEEP GOYIMS · AI SLOP-RIDERS 🤗
 
-GoldShip is a work-in-progress repository. Its current public landing page provides the project name and tagline, but does not yet explain the project's purpose or document an end-to-end development workflow. This README records what can be established from the repository and gives contributors a starting point without guessing at undocumented behavior.
+GoldShip is an early-stage Django website. The current version is a basic multi-page site branded as **NetAgri** in its page templates. It provides a starting point for the project before interactive agricultural features are added.
 
-> **Project status:** Early-stage / documentation incomplete. Confirm the project's intended purpose and runtime before relying on any assumed setup or usage instructions.
+## Current features
 
-## Table of contents
+- Home page
+- About page
+- Shared page layout using Django template inheritance (`base.html`)
+- Navigation between pages
+- Shared CSS served through Django's static-file system
 
-- [Repository layout](#repository-layout)
-- [Getting the repository](#getting-the-repository)
-- [Configuration](#configuration)
-- [Running the project](#running-the-project)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
-- [Project information to add](#project-information-to-add)
+The project does **not** yet implement a crop marketplace, user registration, buyer inquiries, weather data, or other agricultural functionality.
 
-## Repository layout
+## Tech stack
 
-The public repository root currently shows the following entries:
+- **Python** — programming language
+- **Django** — web framework
+- **HTML and CSS** — page content and styling
+- **SQLite** — the default local development database created by Django
+
+PostgreSQL is not required for the current basic website. If `Smolpage/settings.py` has been changed to use PostgreSQL, the database server and matching credentials must be configured separately.
+
+## Requirements
+
+- Python 3.10 or newer
+- `pip` (included with standard Python installations)
+- Git
+
+## Project structure
+
+The repository root should contain the Django project's `manage.py` file:
 
 ```text
 GoldShip/
-├── config/
-└── README.md
+├── manage.py
+├── README.md
+├── requirements.txt
+├── Smolpage/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+└── pages/
+    ├── views.py
+    ├── urls.py
+    ├── templates/
+    │   └── pages/
+    │       ├── base.html
+    │       ├── home.html
+    │       └── about.html
+    └── static/
+        └── pages/
+            └── style.css
 ```
 
-- **`config/`** — the repository's configuration directory. The contents and schema should be documented alongside the specific configuration files once verified.
-- **`README.md`** — project overview and contributor guide.
+Django creates additional files inside `Smolpage/` and `pages/`; they are omitted from this overview for readability.
 
-The root listing does not currently make an application entry point, dependency manifest, test suite, or build process apparent. Inspect the tracked files locally before assuming a language, framework, or command to launch the project.
+## Setup
 
-## Getting the repository
-
-Clone the repository and enter its directory:
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/bum-head/GoldShip.git
 cd GoldShip
 ```
 
-To see which files are tracked by Git:
+Run the following commands from the directory containing `manage.py`.
+
+### 2. Create and activate a virtual environment
+
+On Linux or macOS:
 
 ```bash
-git ls-files
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-To inspect the configuration directory and recent commit history:
+On Windows PowerShell:
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+### 3. Install dependencies
 
 ```bash
-find config -maxdepth 3 -type f -print
-git log --oneline --decorate -10
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-These commands only inspect the repository; they do not install dependencies or start an application.
+### 4. Check the project and set up the local database
 
-## Configuration
+```bash
+python manage.py check
+python manage.py migrate
+```
 
-Configuration-related files are grouped under `config/`. Before changing them:
+The `migrate` command creates Django's standard local database tables. With Django's default settings, the project uses SQLite and does not need a separately running database server.
 
-1. Read each file and identify which program or component consumes it.
-2. Check whether the format is documented in comments, schemas, or upstream documentation.
-3. Preserve the expected structure and value types when editing settings.
-4. Keep credentials, API keys, passwords, and other secrets out of committed files. Use environment variables or an appropriate local secrets mechanism if the project supports one.
+### 5. Start the development server
 
-A complete configuration reference should eventually list each file, its purpose, required values, defaults, and a safe example. No configuration schema or supported options are asserted here because they have not been verified.
+```bash
+python manage.py runserver
+```
 
-## Running the project
+Open <http://127.0.0.1:8000/> in your browser.
 
-A verified launch command cannot be provided from the currently visible repository documentation alone. No language, framework, dependency manager, or executable entry point is identified there.
+Available pages:
 
-After examining the tracked files, add the appropriate instructions here. For example, document the actual dependency installation command, required environment variables, database or service prerequisites (if any), and the command used to start the application. Avoid copying generic commands that do not match the project.
+- Home: <http://127.0.0.1:8000/>
+- About: <http://127.0.0.1:8000/about/>
+- Django Admin: <http://127.0.0.1:8000/admin/> (requires creating an administrator account first)
 
-## Testing
+To create an administrator account, run:
 
-No test command or test workflow is documented in the currently visible repository information.
+```bash
+python manage.py createsuperuser
+```
 
-If tests exist, document the required setup and exact command here. If they do not exist yet, consider adding tests for core behavior and a repeatable way to run them locally before introducing continuous integration.
+Stop the development server with `Ctrl+C`.
 
-## Contributing
+## Dependencies
 
-Contributions and documentation improvements are easier to review when changes are focused and reproducible. A suggested workflow is:
+The current site only needs Django as an external Python package. Python includes SQLite support, and HTML/CSS do not require separate Python packages.
 
-1. Create a branch for the change.
-2. Keep changes focused and explain why they are needed.
-3. Run the relevant checks, or clearly state which checks could not be run.
-4. Open a pull request describing the change, its impact, and any configuration or compatibility implications.
+The `requirements.txt` file should list the Django version/dependency range used by the project. Update it whenever dependencies change so teammates can install the same project requirements.
 
-For bugs or feature ideas, use the [GitHub Issues](https://github.com/bum-head/GoldShip/issues) page. Check the existing issues first and include reproduction steps, expected behavior, actual behavior, and relevant logs when reporting a bug. Remove secrets and personal data from logs before posting them.
+## Running tests
+
+Run Django's test runner with:
+
+```bash
+python manage.py test
+```
+
+The current basic site does not yet have a dedicated automated test suite; this command will run any tests added to the project.
+
+## Basic work setup
+
+1. Pull the latest changes from GitHub.
+2. Activate your virtual environment.
+3. Install any updated dependencies with `python -m pip install -r requirements.txt`.
+4. Apply new database migrations with `python manage.py migrate`.
+5. Start the site with `python manage.py runserver`.
+
+Commit Django migration files if database models are added later. Do not commit your virtual environment, local secrets, or local database contents.
+
+## Troubleshooting
+
+### `python: command not found`
+
+Depending on your operating system, try `python3` instead of `python`.
+
+### Django cannot be imported
+
+Make sure your virtual environment is activated and install dependencies again:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+### The CSS does not load
+
+Check that the stylesheet is located at `pages/static/pages/style.css`, that the template loads Django's static tag library, and that the base template links to `pages/style.css` using the `{% static %}` template tag. The development settings should include `django.contrib.staticfiles` and `DEBUG = True`.
+
+### The server reports a database connection error
+
+The current basic site is intended to use Django's default SQLite configuration. Check the `DATABASES` setting in `Smolpage/settings.py`. If it has been configured for PostgreSQL, PostgreSQL must be running and the configured database credentials must be valid; otherwise restore the default SQLite configuration for local development.
+
+## Project status and next steps
+
+>This is an early-stage project. The immediate goal is to maintain a working, well-documented Django foundation. Potential future features include user accounts, crop listings, regional filtering, buyer-seller inquiries, agricultural guidance, and weather information. These features should be described as implemented only after they are present in the code.
 
 ## License
 
-A license could not be verified from the repository's visible root listing. Until a `LICENSE` file or another explicit license statement is provided, do not assume that the code is available for unrestricted reuse, redistribution, or modification.
-
-## Project information to add
-
-To turn this initial documentation into a complete project guide, the next useful additions are:
-
-- **Purpose:** a concise explanation of the problem GoldShip solves and who it is for.
-- **Features:** a list of implemented capabilities, not planned or speculative ones.
-- **Prerequisites:** supported operating systems, language/runtime version, and external services.
-- **Installation and usage:** exact commands that work from a fresh clone, plus a minimal example.
-- **Configuration reference:** the files under `config/`, their fields, defaults, and examples with secrets omitted.
-- **Testing and troubleshooting:** test commands and solutions to known common errors.
-- **License and support:** the project's license and the preferred channel for questions.
-
----
-
-**Repository:** [bum-head/GoldShip](https://github.com/bum-head/GoldShip)
+No license has been verified for this repository. Until a `LICENSE` file or explicit license statement is added, do not assume the code is licensed for unrestricted reuse or redistribution.
