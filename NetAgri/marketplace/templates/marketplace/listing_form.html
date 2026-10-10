@@ -1,0 +1,24 @@
+{% extends "pages/base.html" %}
+
+{% block title %}Add a Crop | NetAgri{% endblock %}
+
+{% block content %}
+    <section class="content-section">
+        <h1>Add a crop listing</h1>
+
+        <p>
+            Enter the details of the agricultural produce
+            you want to list.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button class="button" type="submit">
+                Publish listing
+            </button>
+        </form>
+    </section>
+{% endblock %}

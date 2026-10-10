@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Registration login
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "marketplace:crop_list"
+LOGOUT_REDIRECT_URL = "marketplace:crop_list"
 
 # Application definition
 
@@ -38,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pages',
+    'marketplace',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,47 @@
+{% extends "pages/base.html" %}
+
+{% block title %}Available Crops | NetAgri{% endblock %}
+
+{% block content %}
+
+<h1>Available crops</h1>
+
+<p>
+    Browse agricultural produce listed in different regions.
+</p>
+
+<div class="crop-grid">
+    {% for listing in listings %}
+        <article class="crop-card">
+            <h2>{{ listing.crop_name }}</h2>
+
+            {% if listing.variety %}
+                <p>Variety: {{ listing.variety }}</p>
+            {% endif %}
+
+            <p>
+                <strong>Quantity:</strong>
+                {{ listing.quantity_kg }} kg
+            </p>
+
+            <p>
+                <strong>Price:</strong>
+                ₹{{ listing.price_per_kg }} per kg
+            </p>
+
+            <p>
+                <strong>Region:</strong>
+                {{ listing.region }}
+            </p>
+
+            <p>
+                <strong>Seller:</strong>
+                {{ listing.seller.username }}
+            </p>
+        </article>
+    {% empty %}
+        <p>No crops are listed yet.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}
