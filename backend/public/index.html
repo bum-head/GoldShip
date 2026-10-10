@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backend Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <header>
+    <h1>Backend Dashboard</h1>
+    <span class="pill" id="overall" data-s="loading">checking…</span>
+  </header>
+
+  <section class="system" id="system"></section>
+
+  <div class="toolbar">
+    <button id="refresh">Refresh now</button>
+    <label><input type="checkbox" id="auto" checked> Auto-refresh (5s)</label>
+    <span id="updated"></span>
+  </div>
+
+  <h2>Modules</h2>
+  <div id="modules" class="modules"></div>
+
+  <h2>Response</h2>
+  <div class="response">
+    <div id="resMeta">Click “Call” on a route to test it.</div>
+    <pre id="resBody"></pre>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
