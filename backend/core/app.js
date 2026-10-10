@@ -53,39 +53,80 @@ async function createApp() {
     for (const r of m.routes) add(r.method, `/api/${m.name}${r.path}`, r.handler);
   }
 
+
   return async function handle(req, res) {
     const origin = req.headers.origin;
-    if (origin && config.CORS_ORIGINS.includes(origin)) {
+    const allowedOrigin = origin && config.CORS_ORIGINS.includes(origin);
+
+    if (allowedOrigin) {
       res.setHeader("Access-Control-Allow-Origin", origin);
       res.setHeader("Vary", "Origin");
     }
 
     const url = new URL(req.url, "http://localhost");
-    const pathname = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, "") : url.pathname;
+    const pathname = url.pathname.length > 1
+      ? url.pathname.replace(/\/+$/, "")
+      : url.pathname;
 
     try {
       if (pathname.startsWith("/api/")) {
+        // Handle browser CORS preflight requests before route lookup.
+        if (req.method === "OPTIONS") {
+          if (!allowedOrigin) {
+            return sendJson(res, 403, { error: "Origin not allowed" });
+          }
+
+          res.writeHead(204, {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Max-Age": "600",
+            "Vary": "Origin",
+          });
+          return res.end();
+        }
+
         const handler = routes.get(`${req.method} ${pathname}`);
+
         if (handler) {
           const data = await handler({
-            req, res, url,
+            req,
+            res,
+            url,
             query: Object.fromEntries(url.searchParams),
             json: () => readJson(req),
           });
+
           return sendJson(res, 200, data === undefined ? { ok: true } : data);
         }
-        const otherMethod = [...routes.keys()].some((k) => k.endsWith(` ${pathname}`));
-        return sendJson(res, otherMethod ? 405 : 404, { error: otherMethod ? "Method not allowed" : "Not found" });
+
+        const otherMethod = [...routes.keys()].some(
+          (k) => k.endsWith(` ${pathname}`)
+        );
+
+        return sendJson(
+          res,
+          otherMethod ? 405 : 404,
+          { error: otherMethod ? "Method not allowed" : "Not found" }
+        );
       }
 
       if (req.method === "GET" && serveStatic(pathname, res)) return;
-      sendJson(res, req.method === "GET" ? 404 : 405, { error: req.method === "GET" ? "Not found" : "Method not allowed" });
+
+      sendJson(
+        res,
+        req.method === "GET" ? 404 : 405,
+        { error: req.method === "GET" ? "Not found" : "Method not allowed" }
+      );
     } catch (e) {
-      if (e instanceof HttpError) return sendJson(res, e.status, { error: e.message });
+      if (e instanceof HttpError) {
+        return sendJson(res, e.status, { error: e.message });
+      }
+
       console.error(e);
       sendJson(res, 500, { error: "Internal server error" });
     }
   };
-}
+
 
 module.exports = { createApp };
