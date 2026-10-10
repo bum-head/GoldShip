@@ -1,3 +1,3 @@
-#   SLEEP GOYS
+#   SLEEP GOYIMS
 
 ##  AI SLOP-RIDERS 🤗
