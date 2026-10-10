@@ -6,4 +6,5 @@ app_name = "marketplace"
 
 urlpatterns = [
     path("", views.crop_list, name="crop_list"),
+    path("add/", views.create_listing, name="create_listing"),
 ]
