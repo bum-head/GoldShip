@@ -35,7 +35,7 @@ It was built around four problem areas: market connectivity, climate variability
 - Stock value and inquiry totals are shown in rupees, and "My listings" shows total active stock value and the value of accepted inquiries
 - These are asking prices, not market rates or confirmed sales. Crop names are free text, so "Rice" and "Paddy" do not match
 
-**Pest watch** (`/resources/pests/report/`)
+**Pest watch** (`/resources/pests/`)
 - Users report pest sightings by region and crop, and the reports are shown to others
 
 **Climate trends** (`/resources/trends/`)
@@ -44,7 +44,7 @@ It was built around four problem areas: market connectivity, climate variability
 
 **Planning insights** (`/resources/advisor/`, login required)
 - Summarises a region's wettest, driest, warmest and coolest months and the local median asking price for a crop
-- Works without any API. If an AI provider key is set as an environment variable (see `resources/advisor.py`), the question is also sent to an AI model
+- Works without any API. If an AI provider key is set as an environment variable (see `resources/advisor.py`), an AI model answers the question instead of the summary
 
 **Admin**
 - Django Admin for regions, listings, inquiries, storage, transport and farming tips
@@ -150,6 +150,7 @@ Django creates additional files inside each app (for example `apps.py` and `__in
 | `/resources/storage/` | Storage facility directory | No |
 | `/resources/transport/` | Transport offers | No |
 | `/resources/tips/` | Farming tips | No |
+| `/resources/pests/` | Pest watch: reports by region | No |
 | `/resources/pests/report/` | Report a pest | Yes |
 | `/resources/trends/` | Historical climate trends (`?region=<id>`) | No |
 | `/resources/advisor/` | Planning insights | Yes |
