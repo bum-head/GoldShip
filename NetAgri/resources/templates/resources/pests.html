@@ -1,0 +1,55 @@
+{% extends "pages/base.html" %}
+{% block title %}Pest watch | NetAgri{% endblock %}
+{% block content %}
+<h1>Pest watch</h1>
+<p>Farmer-reported pest and disease sightings that an administrator has reviewed. These are observations, not diagnoses. Confirm treatment with your local agriculture office or Krishi Vigyan Kendra.</p>
+
+{% if user.is_authenticated %}
+    <p><a href="{% url 'resources:report_pest' %}">Report a pest or disease</a></p>
+{% else %}
+    <p><a href="{% url 'login' %}?next={% url 'resources:report_pest' %}">Log in to report a sighting</a></p>
+{% endif %}
+
+<form method="get">
+    <select name="region">
+        <option value="">All regions</option>
+        {% for r in regions %}
+            <option value="{{ r.pk }}" {% if selected == r.pk %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+</form>
+
+<h2>Last 30 days</h2>
+{% for c in counts %}
+    <p>{{ c.crop_name }} in {{ c.region__name }}: {{ c.n }} reviewed report{{ c.n|pluralize }}</p>
+{% empty %}
+    <p>No reviewed reports in the last 30 days.</p>
+{% endfor %}
+
+<h2>Reviewed reports</h2>
+{% for r in reports %}
+    <article class="crop-card">
+        <h3>{{ r.crop_name }}: {{ r.region }}</h3>
+        <p>Observed {{ r.observed_on }}</p>
+        <p>{{ r.symptoms }}</p>
+        <p><strong>Advisory:</strong> {{ r.advisory }}</p>
+        <p>Source: <a href="{{ r.source_url }}" rel="noopener nofollow">{{ r.source_url }}</a></p>
+    </article>
+{% empty %}
+    <p>No reviewed reports yet.</p>
+{% endfor %}
+
+{% if user.is_authenticated %}
+<h2>Your reports</h2>
+{% for r in mine %}
+    <article class="crop-card">
+        <h3>{{ r.crop_name }}: {{ r.region }}</h3>
+        <p>{{ r.get_status_display }} · observed {{ r.observed_on }}</p>
+        <p>{{ r.symptoms }}</p>
+    </article>
+{% empty %}
+    <p>You haven't submitted any reports.</p>
+{% endfor %}
+{% endif %}
+{% endblock %}

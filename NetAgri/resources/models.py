@@ -1,4 +1,7 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 from marketplace.models import Region
 
@@ -54,3 +57,29 @@ class FarmingTip(models.Model):
 
     def __str__(self):
         return self.crop_name
+
+
+class PestReport(models.Model):
+    STATUS_CHOICES = [("pending", "Pending review"), ("reviewed", "Reviewed")]
+
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pest_reports"
+    )
+    region = models.ForeignKey(Region, on_delete=models.PROTECT, related_name="pest_reports")
+    crop_name = models.CharField(max_length=100)
+    observed_on = models.DateField(default=timezone.localdate)
+    symptoms = models.TextField(help_text="What you see: where on the plant, colour, spread, how many plants.")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+    advisory = models.TextField(blank=True, help_text="Admin only. Guidance from a reliable source.")
+    source_url = models.URLField(blank=True, help_text="Admin only. Required when status is Reviewed.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-observed_on", "-created_at"]
+
+    def clean(self):
+        if self.status == "reviewed" and (not self.advisory.strip() or not self.source_url):
+            raise ValidationError("A reviewed report needs an advisory and a source URL.")
+
+    def __str__(self):
+        return f"{self.crop_name} in {self.region} ({self.observed_on})"

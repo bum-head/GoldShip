@@ -1,0 +1,12 @@
+{% extends "pages/base.html" %}
+{% block title %}Report a pest or disease | NetAgri{% endblock %}
+{% block content %}
+<h1>Report a pest or disease</h1>
+<p>Describe what you see. An administrator reviews each report before anything is shown publicly, and your username is never displayed.</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit report</button>
+</form>
+<p><a href="{% url 'resources:pests' %}">Back to pest watch</a></p>
+{% endblock %}
