@@ -230,3 +230,6 @@ db.sqlite3
 .venv/
 venv/
 .env
+
+# Any SQLite database, including demo databases
+*.sqlite3

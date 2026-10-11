@@ -46,8 +46,11 @@ It was built around four problem areas: market connectivity, climate variability
 - Summarises a region's wettest, driest, warmest and coolest months and the local median asking price for a crop
 - Works without any API. If an AI provider key is set as an environment variable (see `resources/advisor.py`), an AI model answers the question instead of the summary
 
+**Demo data** (`python manage.py seed_demo`, development and demo sites only)
+- Fills a database with invented sample users, listings, inquiries, storage, transport, tips and pest reports, all clearly marked as demo. See [Demo data and the demo site](#demo-data-and-the-demo-site)
+
 **Admin**
-- Django Admin for regions, listings, inquiries, storage, transport and farming tips
+- Django Admin for regions, listings, inquiries, storage, transport, farming tips and pest reports. Staff review pest reports and add an advisory with a source before they appear publicly
 
 ## What is not built yet
 
@@ -58,6 +61,10 @@ It was built around four problem areas: market connectivity, climate variability
 - Climate projections: the trends page shows past averages only, and the dashboard and marketplace alert show current conditions and short-term forecasts
 - Real AI advice: planning insights are a data summary unless an API key is configured
 - Email sending, such as password reset
+- Login throttling: nothing limits repeated password guesses on `/accounts/login/` or `/admin/`
+- Production security settings: secure cookies, forced HTTPS and HSTS are not configured (see [Before you deploy](#before-you-deploy))
+- Rate limiting on planning insights: when an AI key is set, any logged-in user can trigger paid API calls
+- A visible "demo site" notice on the pages
 
 ## Tech stack
 
@@ -131,7 +138,8 @@ GoldShip/
     │   ├── pricing.py            # price check against similar listings
     │   ├── geo.py                # distance between regions
     │   ├── test_pricing.py
-    │   ├── management/commands/seed_regions.py
+    │   ├── management/commands/seed_regions.py   # real reference data: required everywhere
+    │   ├── management/commands/seed_demo.py      # invented sample data: development and demo sites only
     │   ├── migrations/
     │   └── templates/marketplace/
     └── resources/                # storage, transport, farming tips
@@ -248,6 +256,7 @@ Supported settings:
 | `OPENAI_API_KEY` | none, optional | Turns on AI answers for planning insights. Never commit it. |
 | `ADVISOR_MODEL` | `gpt-4o-mini` | Optional OpenAI model name for AI mode. |
 | `WEATHER_API_URL` | Open-Meteo forecast URL | Optional override for the server-side weather source. |
+| `DATABASE_PATH` | `NetAgri/db.sqlite3` | Path of the SQLite database file. Set it to give a demo site, or a local demo, its own database. Never commit database files. |
 
 Never commit `.env`. It is listed in `.gitignore`.
 
@@ -274,6 +283,102 @@ python manage.py runserver
 
 Open <http://127.0.0.1:8000/> in your browser. Stop the server with `Ctrl+C`.
 
+### 7. Add demo data (optional, development only)
+
+A fresh database is empty. To fill it with invented sample data, run this from `NetAgri/`:
+
+```bash
+python manage.py seed_demo
+```
+
+It prints a password for the demo accounts (`demo_seller` and `demo_buyer` are the two to log in with). Read [Demo data and the demo site](#demo-data-and-the-demo-site) before using it anywhere except your own machine. Never run it against a production database.
+
+
+## Demo data and the demo site
+
+The `seed_demo` command fills a database with a large set of **invented** sample data, so every page has something to show. It is for development machines and separate demo sites only.
+
+### What it creates
+
+About 195 crop listings across 20 crops and 13 regions (some already sold), 18 accounts, about 40 inquiries in all three states, 12 storage facilities, 14 transport offers, 10 farming tips and 16 pest reports (about two thirds reviewed, so they appear publicly). Usernames start with `demo_`, emails use `example.com`, and storage, transport and tip records are marked "Demo". The data is generated with a fixed seed, so every run produces the same result.
+
+### Commands
+
+Run these from `NetAgri/`, after `migrate` and `seed_regions`:
+
+```bash
+python manage.py seed_demo                   # create the data (refuses if demo data already exists)
+python manage.py seed_demo --reset           # delete the old demo data, then create it again
+python manage.py seed_demo --password XYZ    # choose the password shared by all demo accounts
+python manage.py seed_demo --demo-site       # only for a separate demo deployment where DEBUG is off
+```
+
+If you do not pass `--password`, a random one is printed once at the end. Log in as `demo_seller` (a Jorhat seller with many listings and inquiries) or `demo_buyer`.
+
+### Warnings
+
+- **Everything is invented.** Prices, quantities, contacts, pest reports and tips are made up. Say so when you show it. The tips are placeholders marked "[Demo]" that point to the ICAR home page. Replace them with real, sourced guidance before real use.
+- **Never put demo data in a production database.** Fake prices would feed the real price check and planning insights, real buyers could contact sellers who do not exist, and all demo accounts share one password. For this reason `seed_demo` refuses to run when `DEBUG` is off unless you add `--demo-site`.
+- **The shared password is a risk on any public server.** Use a strong one with `--password` and give it only to people who ask to see the demo.
+- **Do not commit databases.** `*.sqlite3` is listed in `.gitignore`. Keep it that way, demo databases included.
+- **`--reset` and the clean-up below only touch records marked as demo**: usernames starting with `demo_`, and storage, transport and tip records marked "Demo". Do not give a real account a `demo_` username.
+- **Deleting `seed_demo.py` does not remove the data.** The records live in the database file.
+
+### Removing demo data
+
+From `NetAgri/`:
+
+```bash
+python manage.py shell -c "
+from django.contrib.auth import get_user_model
+from resources.models import StorageFacility, TransportOffer, FarmingTip
+get_user_model().objects.filter(username__startswith='demo_').delete()
+StorageFacility.objects.filter(name__startswith='Demo ').delete()
+TransportOffer.objects.filter(provider__startswith='Demo ').delete()
+FarmingTip.objects.filter(content__startswith='[Demo]').delete()
+"
+```
+
+Deleting the demo users also deletes their listings, inquiries and pest reports. Regions are kept, because they are real reference data. Real accounts are untouched.
+
+### Showing the demo on your own machine
+
+To keep your development database clean, give the demo its own database file. Run these from `NetAgri/`, because a relative path is resolved from the folder you run in.
+
+On Linux or macOS:
+
+```bash
+export DATABASE_PATH=demo.sqlite3
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:DATABASE_PATH="demo.sqlite3"
+```
+
+Then:
+
+```bash
+python manage.py migrate
+python manage.py seed_regions
+python manage.py seed_demo
+python manage.py runserver
+```
+
+To go back to your normal database, unset the variable (`unset DATABASE_PATH`, or `Remove-Item Env:DATABASE_PATH` in PowerShell). Before presenting, open the climate trends page for the regions you will show: the first load fetches five years of history and is slow, then it is cached for 24 hours. Planning insights works without an AI key.
+
+### Running a public demo site
+
+Visitors who want to see the demo should get a **separate deployment** with its own database, never the production site.
+
+1. Deploy the same code a second time, for example at `demo.example.org`.
+2. Give it its own `.env`: a **different** `SECRET_KEY` from production, `ALLOWED_HOSTS` set to the demo domain, and `DATABASE_PATH` pointing to its own SQLite file on persistent storage.
+3. On that deployment only, run `python manage.py migrate`, `python manage.py seed_regions`, then `python manage.py seed_demo --demo-site --password <a strong password>`.
+4. Leave `OPENAI_API_KEY` unset so the demo cannot run up an API bill. Planning insights then shows the free summary.
+5. Re-run `seed_demo --demo-site --reset` now and then, because anyone with the password can add junk.
+6. Add a visible "demo site, sample data" notice to the pages so nobody mistakes it for the real service. This is not built in yet.
+7. Never copy real user data into it, and never copy demo data into production.
 
 ## How the weather features work
 
@@ -305,9 +410,32 @@ node pages/static/pages/climate.test.js
 ```
 
 
+## Before you deploy
+
+For a real deployment, run only these data commands:
+
+```bash
+python manage.py migrate
+python manage.py seed_regions      # required reference data, not demo data
+python manage.py createsuperuser
+```
+
+Do **not** run `seed_demo` on a production database. Use a separate demo site instead (see above).
+
+The repository is set up for local development. The items below are **not configured yet** and should be done before real users rely on the site:
+
+- Set `DEBUG=False`, a unique `SECRET_KEY` and the real `ALLOWED_HOSTS` in the server's environment. Never reuse a development or demo key.
+- Serve the site over HTTPS and add `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_SSL_REDIRECT` and HSTS settings. Run `python manage.py check --deploy` and fix what it reports.
+- Add login throttling (for example `django-axes`) and move the admin away from the default `/admin/` path.
+- Rate-limit planning insights, or leave `OPENAI_API_KEY` unset, so users cannot run up an API bill.
+- Replace SQLite with a production database, set up a real email backend, and configure static file serving (there is no `STATIC_ROOT` yet).
+- Check Open-Meteo's terms: its free service is for non-commercial use.
+- Keep secrets out of git. A key or database committed once stays in the history even after it is deleted, so treat it as leaked and replace it.
+
 ## Rules regarding contributing:
 - Commit Django migration files whenever you change a model.
-- Do not commit `.env`, your virtual environment, `db.sqlite3`, or `__pycache__` folders. Each developer has their own local database.
+- Do not commit `.env`, your virtual environment, any `*.sqlite3` database file (demo databases included), or `__pycache__` folders. Each developer has their own local database.
+- Never commit API keys or passwords. If one is committed by mistake, treat it as leaked and replace it: deleting it in a later commit does not remove it from the history.
 - Work on a branch and open a pull request instead of pushing to `master` directly.
 
 If you had a copy of this repository from before the database file was removed from version control, pulling may delete your local `db.sqlite3`. Copy it somewhere first if it holds data you need, then run `migrate`, `seed_regions` and `createsuperuser` again.
@@ -365,9 +493,21 @@ The alert shows only after you choose a region. The region must have coordinates
 
 The user has no email address. New registrations require one. For older accounts, add an email in Django Admin.
 
+### `Demo data already exists. Run with --reset to replace it.`
+
+`seed_demo` found accounts starting with `demo_`. Run `python manage.py seed_demo --reset` to delete the old demo data and create it again.
+
+### `Refusing to create demo data while DEBUG is off`
+
+This is a safeguard: `DEBUG` is off, so the command assumes this is a real deployment. Only add `--demo-site` if this is a separate demo site that holds no real data.
+
+### I can see demo data on a site that should be real
+
+Remove it with the clean-up commands in [Removing demo data](#removing-demo-data), then check how the data got there. Demo data must never share a database with real users.
+
 ### The server reports a database connection error
 
-The project is intended to use the default SQLite configuration. Check the `DATABASES` setting in `Smolpage/settings.py`.
+The project is intended to use the default SQLite configuration. Check the `DATABASES` setting in `Smolpage/settings.py`, and the `DATABASE_PATH` variable if you set one.
 
 ## Project status and next steps
 
@@ -379,6 +519,8 @@ Planned next steps:
 - Stock handling when inquiries are accepted
 - Storage and transport booking
 - A production deployment configuration (HTTPS, real email backend, production database)
+- Login throttling, secure cookie settings and rate limiting on planning insights (see [Before you deploy](#before-you-deploy))
+- A visible "demo site" notice
 - Pruning unused dependencies
 
 Features should be described as implemented only after they exist in the code.
