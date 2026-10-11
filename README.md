@@ -30,17 +30,33 @@ It was built around four problem areas: market connectivity, climate variability
 - Transport offers by origin and destination
 - Farming tips by crop and region, each with a required source link
 
+**Price insights**
+- Each listing page compares the asking price with the median asking price of other listings of the same crop (same region when there are at least 3 comparables, otherwise all regions; no comparison with fewer than 3)
+- Stock value and inquiry totals are shown in rupees, and "My listings" shows total active stock value and the value of accepted inquiries
+- These are asking prices, not market rates or confirmed sales. Crop names are free text, so "Rice" and "Paddy" do not match
+
+**Pest watch** (`/resources/pests/report/`)
+- Users report pest sightings by region and crop, and the reports are shown to others
+
+**Climate trends** (`/resources/trends/`)
+- Average monthly temperature and rainfall, plus yearly rainfall totals, for the last 5 full years in the chosen region
+- Modelled historical data from Open-Meteo's archive, cached for 24 hours. It is not a forecast
+
+**Planning insights** (`/resources/advisor/`, login required)
+- Summarises a region's wettest, driest, warmest and coolest months and the local median asking price for a crop
+- Works without any API. If an AI provider key is set as an environment variable (see `resources/advisor.py`), the question is also sent to an AI model
+
 **Admin**
 - Django Admin for regions, listings, inquiries, storage, transport and farming tips
 
 ## What is not built yet
 
-- Pest and disease reporting
 - Payments, checkout and delivery tracking
 - Stock reservation: accepting an inquiry does **not** reduce a listing's quantity, so an accepted inquiry is an agreement to talk, not a completed sale
 - Separate buyer and seller roles: any logged-in user can list crops and send inquiries, except on their own listings
 - Storage booking and transport booking (the directories are for browsing and contact only)
-- Long-term climate analysis: the weather features are current conditions and short-term forecasts, not climate projections
+- Climate projections: the trends page shows past averages only, and the dashboard and marketplace alert show current conditions and short-term forecasts
+- Real AI advice: planning insights are a data summary unless an API key is configured
 - Email sending, such as password reset
 
 ## Tech stack
@@ -124,6 +140,9 @@ Django creates additional files inside each app (for example `apps.py` and `__in
 | `/resources/storage/` | Storage facility directory | No |
 | `/resources/transport/` | Transport offers | No |
 | `/resources/tips/` | Farming tips | No |
+| `/resources/pests/report/` | Report a pest | Yes |
+| `/resources/trends/` | Historical climate trends (`?region=<id>`) | No |
+| `/resources/advisor/` | Planning insights | Yes |
 | `/admin/` | Django Admin | Staff account |
 
 ## Data model
@@ -194,6 +213,8 @@ Supported settings:
 | `SECRET_KEY` | none, required | Django's signing key. Every machine should have its own. |
 | `DEBUG` | `False` | Use `True` for local development only. |
 | `ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated hosts the site may be served on. |
+| `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` | none, optional | Turns on AI mode for planning insights. Use the one matching `resources/advisor.py`. Never commit it. |
+| `ADVISOR_MODEL` | provider default | Optional model name for AI mode. |
 
 Never commit `.env`. It is listed in `.gitignore`.
 
@@ -239,6 +260,8 @@ There are two separate weather implementations:
 
 The two use different data and scoring, so they can disagree. Merging them into one approach is a planned improvement.
 
+A third, separate piece is the **climate trends** page (`/resources/trends/`). The server (`resources/trends.py`) fetches five years of daily history from Open-Meteo's archive, averages it by month and caches it for 24 hours. It shows past averages, not forecasts.
+
 The server-side rating starts at 100 and subtracts points for temperature outside 15 to 30 °C, wind above 15 km/h, precipitation, very high or low humidity, and the weather condition code. Scores of 80 or more are Good, 60 to 79 Fair, 40 to 59 Poor, and below 40 Bad.
 
 ## Running tests
@@ -249,7 +272,7 @@ From `NetAgri/`:
 python manage.py test
 ```
 
-This runs the Python test suites for the marketplace (region filter, inquiries, seller permissions), registration, and the climate rating.
+This runs the Python test suites for the marketplace (region filter, inquiries, seller permissions), registration, the climate rating, price insights, climate trends and planning insights.
 
 The dashboard's JavaScript has its own tests, which need Node.js:
 
