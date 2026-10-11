@@ -274,15 +274,6 @@ python manage.py runserver
 
 Open <http://127.0.0.1:8000/> in your browser. Stop the server with `Ctrl+C`.
 
-### 7. Add sample data (recommended)
-
-A fresh database is empty. Log in at <http://127.0.0.1:8000/admin/> and add:
-
-- A few crop listings in different regions (or register test users and add them through the site)
-- A storage facility and a transport offer
-- Farming tips. Each needs a source URL. Use real guidance from agricultural extension sources such as ICAR institutes or the local Krishi Vigyan Kendra. Do not invent doses or practices.
-
-Give your test users an email address in Django Admin, otherwise the contact line after an accepted inquiry shows "(no email on file)".
 
 ## How the weather features work
 
