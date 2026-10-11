@@ -63,3 +63,35 @@ class CropListing(models.Model):
 
     def __str__(self):
         return f"{self.crop_name} - {self.region}"
+
+class Inquiry(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("accepted", "Accepted"),
+        ("declined", "Declined"),
+    ]
+
+    buyer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sent_inquiries",
+    )
+    listing = models.ForeignKey(
+        CropListing,
+        on_delete=models.CASCADE,
+        related_name="inquiries",
+    )
+    quantity_kg = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0.01)],
+    )
+    message = models.TextField(blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.buyer} → {self.listing.crop_name} ({self.status})"

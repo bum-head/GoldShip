@@ -1,0 +1,38 @@
+{% extends "pages/base.html" %}
+{% block title %}Inquiries | NetAgri{% endblock %}
+{% block content %}
+<h1>Inquiries</h1>
+
+<h2>Received (for your crops)</h2>
+{% for i in received %}
+    <article class="crop-card">
+        <h3>{{ i.listing.crop_name }}: {{ i.quantity_kg }} kg</h3>
+        <p>From {{ i.buyer.username }} · {{ i.get_status_display }}</p>
+        {% if i.message %}<p>{{ i.message }}</p>{% endif %}
+        {% if i.status == "pending" %}
+        <form method="post" action="{% url 'marketplace:respond_to_inquiry' i.pk %}">
+            {% csrf_token %}
+            <button name="status" value="accepted">Accept</button>
+            <button name="status" value="declined">Decline</button>
+        </form>
+        {% elif i.status == "accepted" %}
+        <p><strong>Buyer contact:</strong> {{ i.buyer.email|default:"(no email on file)" }}</p>
+        {% endif %}
+    </article>
+{% empty %}
+    <p>No inquiries received yet.</p>
+{% endfor %}
+
+<h2>Sent</h2>
+{% for i in sent %}
+    <article class="crop-card">
+        <h3>{{ i.listing.crop_name }}: {{ i.quantity_kg }} kg</h3>
+        <p>{{ i.listing.region }} · {{ i.get_status_display }}</p>
+        {% if i.status == "accepted" %}
+        <p><strong>Seller contact:</strong> {{ i.listing.seller.email|default:"(no email on file)" }}</p>
+        {% endif %}
+    </article>
+{% empty %}
+    <p>You haven't sent any inquiries.</p>
+{% endfor %}
+{% endblock %}

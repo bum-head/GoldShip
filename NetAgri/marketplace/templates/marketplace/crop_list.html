@@ -11,6 +11,12 @@
 </p>
 
 <div class="crop-grid">
+    {% if alert %}
+    <p class="problem-card">
+        <strong>{{ region.name }}: current weather is {{ alert.label }}</strong>
+        ({{ alert.condition }}, {{ alert.temperature }} °C). {{ alert.advice }}
+    </p>
+    {% endif %}
     <form method="get">
     <input type="search" name="q" value="{{ q }}" placeholder="Search crops">
     <select name="region">
@@ -22,6 +28,11 @@
     <button type="submit">Filter</button>
     </form>
     {% for listing in listings %}
+        {% if user.is_authenticated and user != listing.seller %}
+            <a href="{% url 'marketplace:create_inquiry' listing.pk %}">Contact seller</a>
+        {% elif not user.is_authenticated %}
+            <a href="{% url 'login' %}?next={{ request.get_full_path }}">Log in to contact seller</a>
+        {% endif %}
         <article class="crop-card">
             <h2>{{ listing.crop_name }}</h2>
 

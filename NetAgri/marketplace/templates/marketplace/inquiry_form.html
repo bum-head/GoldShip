@@ -1,0 +1,11 @@
+{% extends "pages/base.html" %}
+{% block title %}Contact seller | NetAgri{% endblock %}
+{% block content %}
+<h1>Contact seller about {{ listing.crop_name }}</h1>
+<p>{{ listing.quantity_kg }} kg available at ₹{{ listing.price_per_kg }}/kg in {{ listing.region }}.</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Send inquiry</button>
+</form>
+{% endblock %}

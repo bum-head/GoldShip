@@ -1,0 +1,22 @@
+{% extends "pages/base.html" %}
+{% block title %}My listings | NetAgri{% endblock %}
+{% block content %}
+<h1>My listings</h1>
+<p><a href="{% url 'marketplace:create_listing' %}">Add a crop</a></p>
+
+{% for l in listings %}
+    <article class="crop-card">
+        <h3>{{ l.crop_name }}</h3>
+        <p>{{ l.quantity_kg }} kg at ₹{{ l.price_per_kg }}/kg · {{ l.region }} · {{ l.get_status_display }}</p>
+        <a href="{% url 'marketplace:edit_listing' l.pk %}">Edit</a>
+        {% if l.status == "active" %}
+        <form method="post" action="{% url 'marketplace:mark_sold' l.pk %}" style="display:inline">
+            {% csrf_token %}
+            <button type="submit">Mark sold</button>
+        </form>
+        {% endif %}
+    </article>
+{% empty %}
+    <p>You haven't listed any crops yet.</p>
+{% endfor %}
+{% endblock %}
