@@ -36,23 +36,5 @@ def register(request):
 def dashboard(request):
     return render(request, "pages/dashboard.html", {"ner": places_for_frontend()})
 
-@require_GET
-@never_cache
-def climate_weather(request):
-    try:
-        loc = cs.parse_coords(request.GET)
-        return JsonResponse(cs.fetch_raw_weather(**loc))
-    except cs.ApiError as e:
-        return JsonResponse({"error": e.message}, status=e.status)
 
 
-@require_GET
-@never_cache
-def climate_rating(request):
-    try:
-        loc = cs.parse_coords(request.GET)
-        weather = cs.normalize_weather(cs.fetch_raw_weather(**loc))
-        return JsonResponse({"location": loc, "weather": weather,
-                             "rating": cs.rate_weather(weather)})
-    except cs.ApiError as e:
-        return JsonResponse({"error": e.message}, status=e.status)
