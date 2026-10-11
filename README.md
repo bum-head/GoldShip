@@ -62,7 +62,7 @@ It was built around four problem areas: market connectivity, climate variability
 - Real AI advice: planning insights are a data summary unless an API key is configured
 - Email sending, such as password reset
 - Login throttling: nothing limits repeated password guesses on `/accounts/login/` or `/admin/`
-- Production security settings: secure cookies, forced HTTPS and HSTS are not configured (see [Before you deploy](#before-you-deploy))
+- Production security settings: secure cookies, forced HTTPS and HSTS are not configured 
 - Rate limiting on planning insights: when an AI key is set, any logged-in user can trigger paid API calls
 - A visible "demo site" notice on the pages
 
@@ -410,28 +410,6 @@ node pages/static/pages/climate.test.js
 ```
 
 
-## Before you deploy
-
-For a real deployment, run only these data commands:
-
-```bash
-python manage.py migrate
-python manage.py seed_regions      # required reference data, not demo data
-python manage.py createsuperuser
-```
-
-Do **not** run `seed_demo` on a production database. Use a separate demo site instead (see above).
-
-The repository is set up for local development. The items below are **not configured yet** and should be done before real users rely on the site:
-
-- Set `DEBUG=False`, a unique `SECRET_KEY` and the real `ALLOWED_HOSTS` in the server's environment. Never reuse a development or demo key.
-- Serve the site over HTTPS and add `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_SSL_REDIRECT` and HSTS settings. Run `python manage.py check --deploy` and fix what it reports.
-- Add login throttling (for example `django-axes`) and move the admin away from the default `/admin/` path.
-- Rate-limit planning insights, or leave `OPENAI_API_KEY` unset, so users cannot run up an API bill.
-- Replace SQLite with a production database, set up a real email backend, and configure static file serving (there is no `STATIC_ROOT` yet).
-- Check Open-Meteo's terms: its free service is for non-commercial use.
-- Keep secrets out of git. A key or database committed once stays in the history even after it is deleted, so treat it as leaked and replace it.
-
 ## Rules regarding contributing:
 - Commit Django migration files whenever you change a model.
 - Do not commit `.env`, your virtual environment, any `*.sqlite3` database file (demo databases included), or `__pycache__` folders. Each developer has their own local database.
@@ -519,7 +497,7 @@ Planned next steps:
 - Stock handling when inquiries are accepted
 - Storage and transport booking
 - A production deployment configuration (HTTPS, real email backend, production database)
-- Login throttling, secure cookie settings and rate limiting on planning insights (see [Before you deploy](#before-you-deploy))
+- Login throttling, secure cookie settings and rate limiting on planning insights 
 - A visible "demo site" notice
 - Pruning unused dependencies
 
