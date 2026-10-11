@@ -1,6 +1,6 @@
-# GoldShip
+# NetAgri
 
-GoldShip is a Django web application branded as **NetAgri** in its page templates. It is a regional agricultural platform for North East India: farmers list crops by region, buyers search and contact them, and a weather and climate dashboard helps with day-to-day decisions. The site also includes directories for storage, transport and sourced farming guidance.
+NetAgri is a Django web application (the repository is named GoldShip). It is a regional agricultural platform for North East India: farmers list crops by region, buyers search and contact them, and a weather and climate dashboard helps with day-to-day decisions. The site also includes directories for storage, transport and sourced farming guidance.
 
 It was built around four problem areas: market connectivity, climate variability, post-harvest management and agricultural productivity. The whole area is split into regions (towns and districts), and most features are filtered by region.
 
@@ -68,6 +68,26 @@ It was built around four problem areas: market connectivity, climate variability
 - **SQLite**: the default local development database created by Django
 
 PostgreSQL is not required. `psycopg` appears in `requirements.txt`, but the project settings use SQLite.
+
+## External services and APIs
+
+NetAgri calls these external services. Only the OpenAI one needs a key, and it is optional.
+
+| Service | Endpoint | Used for | Called from | Key needed |
+|---|---|---|---|---|
+| Open-Meteo Forecast API | `https://api.open-meteo.com/v1/forecast` | Current conditions and short-term forecast: the marketplace weather alert (server, `pages/climate_service.py`; the URL can be overridden with `WEATHER_API_URL`) and the dashboard (browser, `climate.js`) | Server and browser | No |
+| Open-Meteo Flood API (GloFAS) | `https://flood-api.open-meteo.com/v1/flood` | River discharge and flood information on the dashboard | Browser (`climate.js`) | No |
+| Open-Meteo Historical Weather API | `https://archive-api.open-meteo.com/v1/archive` | Five years of daily history for the climate trends page and planning insights | Server (`resources/trends.py`) | No |
+| OpenAI Chat Completions API | `https://api.openai.com/v1/chat/completions` | Optional AI answers on the planning insights page | Server (`resources/advisor.py`) | Yes, `OPENAI_API_KEY` |
+| OpenStreetMap tile server | `https://tile.openstreetmap.org/{z}/{x}/{y}.png` | Map background on the dashboard | Browser (Leaflet) | No |
+
+Also loaded from the internet, but not an API: the Leaflet library (CSS and JavaScript) from `https://unpkg.com/leaflet@1.9.4/`, on the dashboard page.
+
+Things to know:
+- Open-Meteo's free service is for non-commercial use. Check its terms before any commercial deployment.
+- Dashboard requests come from the visitor's browser, so Open-Meteo and the tile server see the visitor's IP address and the coordinates of the chosen place.
+- If an OpenAI key is set, the selected region, its climate averages, the crop's local median asking price and the question the user typed (up to 500 characters) are sent to OpenAI. Do not type personal details into that box.
+- If any service is unreachable, the related feature shows a message or hides itself. Planning insights falls back to the local summary.
 
 ## Requirements
 
@@ -225,8 +245,9 @@ Supported settings:
 | `SECRET_KEY` | none, required | Django's signing key. Every machine should have its own. |
 | `DEBUG` | `False` | Use `True` for local development only. |
 | `ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated hosts the site may be served on. |
-| `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` | none, optional | Turns on AI mode for planning insights. Use the one matching `resources/advisor.py`. Never commit it. |
-| `ADVISOR_MODEL` | provider default | Optional model name for AI mode. |
+| `OPENAI_API_KEY` | none, optional | Turns on AI answers for planning insights. Never commit it. |
+| `ADVISOR_MODEL` | `gpt-4o-mini` | Optional OpenAI model name for AI mode. |
+| `WEATHER_API_URL` | Open-Meteo forecast URL | Optional override for the server-side weather source. |
 
 Never commit `.env`. It is listed in `.gitignore`.
 
