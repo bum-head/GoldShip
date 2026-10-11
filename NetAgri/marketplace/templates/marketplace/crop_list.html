@@ -34,7 +34,7 @@
             <a href="{% url 'login' %}?next={{ request.get_full_path }}">Log in to contact seller</a>
         {% endif %}
         <article class="crop-card">
-            <h2>{{ listing.crop_name }}</h2>
+            <h2><a href="{% url 'marketplace:listing_detail' listing.pk %}">{{ listing.crop_name }}</a></h2>
 
             {% if listing.variety %}
                 <p>Variety: {{ listing.variety }}</p>

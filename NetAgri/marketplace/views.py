@@ -1,10 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from .forms import CropListingForm, InquiryForm
 from .models import CropListing, Inquiry, Region
+from resources.models import StorageFacility, TransportOffer
+
+from .geo import haversine_km
 from .weather import region_alert
 
 
@@ -113,3 +117,48 @@ def respond_to_inquiry(request, pk):
         inquiry.status = status
         inquiry.save(update_fields=["status"])
     return redirect("marketplace:inquiry_list")
+
+
+NEARBY_KM = 150
+
+
+def _distance_km(a, b):
+    """Straight-line km between two regions, or None if either lacks coordinates."""
+    if a.pk == b.pk:
+        return 0
+    if None in (a.latitude, a.longitude, b.latitude, b.longitude):
+        return None
+    return haversine_km(float(a.latitude), float(a.longitude),
+                        float(b.latitude), float(b.longitude))
+
+
+def listing_detail(request, pk):
+    listing = get_object_or_404(CropListing.objects.select_related("region", "seller"), pk=pk)
+    if listing.status != "active" and listing.seller_id != request.user.id:
+        raise Http404
+
+    storage = []
+    for f in StorageFacility.objects.select_related("region"):
+        d = _distance_km(listing.region, f.region)
+        if d is not None and d <= NEARBY_KM:
+            storage.append({"item": f, "km": round(d)})
+    storage.sort(key=lambda row: row["km"])
+
+    transport = []
+    for t in TransportOffer.objects.select_related("origin", "destination"):
+        d = _distance_km(listing.region, t.origin)
+        if d is not None and d <= NEARBY_KM:
+            transport.append({
+                "item": t,
+                "km": round(d),
+                "difficult": "poor" in (t.origin.road_access, t.destination.road_access),
+            })
+    transport.sort(key=lambda row: row["km"])
+
+    return render(request, "marketplace/listing_detail.html", {
+        "listing": listing,
+        "alert": region_alert(listing.region),
+        "storage": storage[:5],
+        "transport": transport[:5],
+        "radius": NEARBY_KM,
+    })

@@ -10,6 +10,15 @@ class Region(models.Model):
     latitude = models.DecimalField(max_digits=8, decimal_places=5, null=True, blank=True)
     longitude = models.DecimalField(max_digits=8, decimal_places=5, null=True, blank=True)
 
+    ROAD_CHOICES = [
+        ("unknown", "Not assessed"),
+        ("good", "Good road access"),
+        ("fair", "Fair, some seasonal disruption"),
+        ("poor", "Poor or remote"),
+    ]
+    road_access = models.CharField(max_length=10, choices=ROAD_CHOICES, default="unknown")
+    terrain_note = models.CharField(max_length=200, blank=True)
+
     class Meta:
         ordering = ["state", "name"]
 

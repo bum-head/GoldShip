@@ -1,0 +1,57 @@
+{% extends "pages/base.html" %}
+{% block title %}{{ listing.crop_name }} | NetAgri{% endblock %}
+{% block content %}
+<h1>{{ listing.crop_name }}{% if listing.variety %} ({{ listing.variety }}){% endif %}</h1>
+<p>{{ listing.quantity_kg }} kg at ₹{{ listing.price_per_kg }}/kg · {{ listing.region }} · {{ listing.get_status_display }}</p>
+<p>Seller: {{ listing.seller.username }}</p>
+
+{% if user.is_authenticated and user != listing.seller and listing.status == "active" %}
+    <p><a href="{% url 'marketplace:create_inquiry' listing.pk %}">Contact seller</a></p>
+{% elif not user.is_authenticated %}
+    <p><a href="{% url 'login' %}?next={{ request.path }}">Log in to contact seller</a></p>
+{% endif %}
+
+{% if alert %}
+<p class="problem-card">
+    <strong>Current weather in {{ listing.region.name }}: {{ alert.label }}</strong>
+    ({{ alert.condition }}, {{ alert.temperature }} °C). {{ alert.advice }}
+</p>
+{% endif %}
+
+<h2>Getting it to market</h2>
+{% if listing.region.road_access != "unknown" %}
+<p class="problem-card">
+    <strong>Road access from {{ listing.region.name }}:</strong> {{ listing.region.get_road_access_display }}.
+    {{ listing.region.terrain_note }}
+</p>
+{% endif %}
+<p><small>Distances are straight-line, not road distance. In hilly terrain the road can be much longer. Showing options within {{ radius }} km.</small></p>
+
+<h3>Storage nearby</h3>
+{% for row in storage %}
+    <article class="crop-card">
+        <h4>{{ row.item.name }}</h4>
+        <p>{{ row.item.get_storage_type_display }} · {{ row.item.region }} · about {{ row.km }} km away</p>
+        {% if row.item.capacity_kg %}<p>Capacity: {{ row.item.capacity_kg }} kg</p>{% endif %}
+        <p>Contact: {{ row.item.contact }}</p>
+    </article>
+{% empty %}
+    <p>No storage facilities listed nearby yet.</p>
+{% endfor %}
+
+<h3>Transport from nearby</h3>
+{% for row in transport %}
+    <article class="crop-card">
+        <h4>{{ row.item.origin }} → {{ row.item.destination }}</h4>
+        <p>{{ row.item.provider }} · {{ row.item.vehicle_type }} · pickup region about {{ row.km }} km away</p>
+        {% if row.item.capacity_kg %}<p>Capacity: {{ row.item.capacity_kg }} kg</p>{% endif %}
+        {% if row.item.available_from %}<p>Available from: {{ row.item.available_from }}</p>{% endif %}
+        <p>Contact: {{ row.item.contact }}</p>
+        {% if row.difficult %}<p><strong>Warning:</strong> this route touches a region marked as poor or remote road access.</p>{% endif %}
+    </article>
+{% empty %}
+    <p>No transport offers from nearby regions yet.</p>
+{% endfor %}
+
+<p><a href="{% url 'marketplace:crop_list' %}">Back to marketplace</a></p>
+{% endblock %}

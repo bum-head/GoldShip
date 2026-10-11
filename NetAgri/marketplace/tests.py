@@ -98,3 +98,37 @@ class SellerManagementTests(TestCase):
     def test_mark_sold_rejects_get(self):
         self.client.login(username="seller2", password="pw")
         self.assertEqual(self.client.get(self.sold_url).status_code, 405)
+
+
+from resources.models import StorageFacility
+
+from .geo import haversine_km
+
+
+class LogisticsTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.seller = User.objects.create_user("seller3", password="pw")
+        self.jorhat = Region.objects.create(name="Jorhat", state="Assam", latitude=26.7509, longitude=94.2037)
+        self.majuli = Region.objects.create(name="Majuli", state="Assam", latitude=26.95, longitude=94.1667)
+        self.aizawl = Region.objects.create(name="Aizawl", state="Mizoram", latitude=23.7271, longitude=92.7176)
+        self.listing = CropListing.objects.create(
+            seller=self.seller, region=self.jorhat, crop_name="Tea", quantity_kg=10, price_per_kg=5)
+        for name, region in [("Far store", self.aizawl), ("Near store", self.majuli), ("Local store", self.jorhat)]:
+            StorageFacility.objects.create(name=name, region=region, contact="123")
+
+    def test_distance_is_sensible(self):
+        d = haversine_km(26.1445, 91.7362, 26.7509, 94.2037)  # Guwahati to Jorhat
+        self.assertTrue(240 < d < 270)
+
+    def test_storage_sorted_by_distance_and_far_ones_hidden(self):
+        r = self.client.get(reverse("marketplace:listing_detail", args=[self.listing.pk]))
+        self.assertEqual([row["item"].name for row in r.context["storage"]], ["Local store", "Near store"])
+
+    def test_sold_listing_hidden_from_others_but_not_owner(self):
+        self.listing.status = "sold"
+        self.listing.save()
+        url = reverse("marketplace:listing_detail", args=[self.listing.pk])
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.client.login(username="seller3", password="pw")
+        self.assertEqual(self.client.get(url).status_code, 200)
