@@ -108,13 +108,23 @@ GoldShip/
     │   ├── forms.py
     │   ├── urls.py
     │   ├── weather.py            # cached region weather alert
+    │   ├── pricing.py            # price check against similar listings
+    │   ├── geo.py                # distance between regions
+    │   ├── test_pricing.py
     │   ├── management/commands/seed_regions.py
     │   ├── migrations/
     │   └── templates/marketplace/
     └── resources/                # storage, transport, farming tips
-        ├── models.py             # StorageFacility, TransportOffer, FarmingTip
+        ├── models.py             # StorageFacility, TransportOffer, FarmingTip, PestReport
         ├── views.py
         ├── urls.py
+        ├── pest_views.py         # pest reports
+        ├── trends.py             # Open-Meteo history, monthly averages
+        ├── trend_views.py        # climate trends page
+        ├── advisor.py            # planning insights, optional AI call
+        ├── advisor_views.py
+        ├── test_trends.py
+        ├── test_advisor.py
         └── templates/resources/
 ```
 
@@ -153,6 +163,7 @@ Django creates additional files inside each app (for example `apps.py` and `__in
 - **StorageFacility**: name, type, region, capacity, contact, notes.
 - **TransportOffer**: provider, origin region, destination region, vehicle type, capacity, available-from date, contact, notes.
 - **FarmingTip**: crop name, optional region, season, content, required source URL, updated time.
+- **PestReport**: reporter, region, crop name, observed on, symptoms, status, advisory, source url, created at.
 
 ## Setup
 
