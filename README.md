@@ -527,4 +527,6 @@ Features should be described as implemented only after they exist in the code.
 
 ## License
 
-No license has been verified for this repository. Until a `LICENSE` file or explicit license statement is added, do not assume the code is licensed for unrestricted reuse or redistribution.
+This project's code is released under the [MIT License](LICENSE).
+
+The license covers this repository's code only. Third-party services and data keep their own terms: Open-Meteo's free service is for non-commercial use, OpenStreetMap map data is under the ODbL and needs attribution, and Leaflet and the Python packages in `requirements.txt` have their own licenses. The demo data is invented sample content.
