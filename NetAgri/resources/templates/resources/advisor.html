@@ -1,8 +1,8 @@
 {% extends "pages/base.html" %}
-{% block title %}AI advisor | NetAgri{% endblock %}
+{% block title %}Planning insights | NetAgri{% endblock %}
 {% block content %}
-<h1>AI advisor</h1>
-<p>Ask about sowing, harvest or selling. Answers use this region's historical climate and local asking prices. They are suggestions, not forecasts or guarantees.</p>
+<h1>Planning insights</h1>
+<p>Pick a region and crop to see planning insights. They use this region's historical climate and local asking prices. They are suggestions, not forecasts or guarantees.</p>
 <form method="post">
     {% csrf_token %}
     <select name="region">
