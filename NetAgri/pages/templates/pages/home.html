@@ -5,69 +5,70 @@
 {% block content %}
 
 <section class="hero">
-    <p class="eyebrow">AGRICULTURE · CONNECTIVITY · INFORMATION</p>
+    <p class="eyebrow">For farming communities in North East India</p>
 
     <h1>Building better connections for agriculture.</h1>
 
     <p class="hero-description">
-        NetAgri is a project aimed at helping farming communities
-        access agricultural information and connect with buyers
-        and local services.
+        List your crops, find buyers nearby, check how your price compares,
+        and plan around the weather, all in one place.
     </p>
 
-    <a class="button" href="{% url 'about' %}">
-        Learn about NetAgri
-    </a>
+    <a class="button" href="{% url 'marketplace:crop_list' %}">Browse crops</a>
+    <a class="button button-secondary" href="{% url 'resources:trends' %}">See climate trends</a>
 </section>
 
 <section class="problems">
-    <h2>What are we trying to solve?</h2>
+    <h2>What you can do on NetAgri</h2>
 
-    <div class="problem-grid">
-        <article class="problem-card">
-            <h3>Agricultural productivity</h3>
-            <p>
-                Make useful farming information and cultivation
-                guidance easier to access.
-            </p>
-        </article>
+    <div class="feature-grid">
+        <a class="feature-card" href="{% url 'marketplace:crop_list' %}">
+            <h3>Find and sell crops</h3>
+            <p>Search listings by crop and region, and send an inquiry to the seller.</p>
+        </a>
 
-        <article class="problem-card">
-            <h3>Climate uncertainty</h3>
-            <p>
-                Make relevant weather information and agricultural
-                advisories easier to find.
-            </p>
-        </article>
+        <a class="feature-card" href="{% url 'marketplace:crop_list' %}">
+            <h3>Check a price</h3>
+            <p>Each listing shows how its asking price compares with similar listings.</p>
+        </a>
 
-        <article class="problem-card">
-            <h3>Post-harvest losses</h3>
-            <p>
-                Explore ways to connect farmers with storage
-                resources and information about crop handling.
-            </p>
-        </article>
+        <a class="feature-card" href="{% url 'resources:trends' %}">
+            <h3>Climate trends</h3>
+            <p>Typical monthly rainfall and temperature from the last five years.</p>
+        </a>
 
-        <article class="problem-card">
-            <h3>Market connectivity</h3>
-            <p>
-                Help farmers and buyers discover opportunities
-                to connect within their regions.
-            </p>
-        </article>
+        <a class="feature-card" href="{% url 'resources:pests' %}">
+            <h3>Pest watch</h3>
+            <p>See pest reports from your region, or report one you have found.</p>
+        </a>
+
+        <a class="feature-card" href="{% url 'resources:storage' %}">
+            <h3>Storage and transport</h3>
+            <p>Find storage facilities and transport offers between regions.</p>
+        </a>
+
+        <a class="feature-card" href="{% url 'resources:tips' %}">
+            <h3>Farming tips</h3>
+            <p>Guidance by crop and region, each with a source you can check.</p>
+        </a>
     </div>
 </section>
 
 <section class="next-section">
-    <h2>A platform in development</h2>
+    <h2>What NetAgri is for</h2>
 
     <p>
-        NetAgri is currently under development. These are the
-        problems the project aims to address; its agricultural
-        and marketplace features are not yet implemented.
+        We are working on four problems: farming information that is hard
+        to find, uncertain weather, crops lost after harvest, and farmers
+        and buyers who never meet.
     </p>
 
-    <a href="{% url 'about' %}">Read about the project →</a>
+    <p>
+        Payments, delivery and booking are not part of the platform yet.
+        An accepted inquiry is an agreement to talk, not a completed sale.
+    </p>
+
+    <a href="{% url 'about' %}">Read about the project</a>
 </section>
 
 {% endblock %}
