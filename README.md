@@ -1,62 +1,139 @@
 # GoldShip
 
-### SLEEP GOYIMS · AI SLOP-RIDERS 🤗
+GoldShip is a Django web application branded as **NetAgri** in its page templates. It is a regional agricultural platform for North East India: farmers list crops by region, buyers search and contact them, and a weather and climate dashboard helps with day-to-day decisions. The site also includes directories for storage, transport and sourced farming guidance.
 
-GoldShip is an early-stage Django website. The current version is a basic multi-page site branded as **NetAgri** in its page templates. It provides a starting point for the project before interactive agricultural features are added.
+It was built around four problem areas: market connectivity, climate variability, post-harvest management and agricultural productivity. The whole area is split into regions (towns and districts), and most features are filtered by region.
 
 ## Current features
 
-- Home page
-- About page
-- Shared page layout using Django template inheritance (`base.html`)
-- Navigation between pages
-- Shared CSS served through Django's static-file system
+**Accounts**
+- Registration with username, email and password (the email is shared with the other party only after an inquiry is accepted)
+- Login and logout using Django's built-in authentication
 
-The project does **not** yet implement a crop marketplace, user registration, buyer inquiries, weather data, or other agricultural functionality.
+**Crop marketplace**
+- Browse available crops, with search by crop name and filter by region
+- Sellers add, edit and mark their own crops as sold
+- Sold crops disappear from the public marketplace
+- A current-weather alert for the selected region, shown above the listings
+
+**Buyer inquiries**
+- Buyers send an inquiry (quantity and message) about a listing
+- Sellers accept or decline inquiries
+- Contact emails are revealed to both sides once an inquiry is accepted
+
+**Weather and climate dashboard** (`/dashboard/`)
+- Map with a state and place picker for the North Eastern states
+- Weather, forecast and flood information for the chosen location
+
+**Resources** (`/resources/`)
+- Storage facility directory (post-harvest management)
+- Transport offers by origin and destination
+- Farming tips by crop and region, each with a required source link
+
+**Admin**
+- Django Admin for regions, listings, inquiries, storage, transport and farming tips
+
+## What is not built yet
+
+- Pest and disease reporting
+- Payments, checkout and delivery tracking
+- Stock reservation: accepting an inquiry does **not** reduce a listing's quantity, so an accepted inquiry is an agreement to talk, not a completed sale
+- Separate buyer and seller roles: any logged-in user can list crops and send inquiries, except on their own listings
+- Storage booking and transport booking (the directories are for browsing and contact only)
+- Long-term climate analysis: the weather features are current conditions and short-term forecasts, not climate projections
+- Email sending, such as password reset
 
 ## Tech stack
 
-- **Python** — programming language
-- **Django** — web framework
-- **HTML and CSS** — page content and styling
-- **SQLite** — the default local development database created by Django
+- **Python** and **Django 6.1**: backend, templates, authentication, database layer
+- **HTML, CSS and JavaScript**: page content, styling and the dashboard
+- **Leaflet** with OpenStreetMap tiles: the dashboard map
+- **Open-Meteo**: weather data source
+- **SQLite**: the default local development database created by Django
 
-PostgreSQL is not required for the current basic website. If `Smolpage/settings.py` has been changed to use PostgreSQL, the database server and matching credentials must be configured separately.
+PostgreSQL is not required. `psycopg` appears in `requirements.txt`, but the project settings use SQLite.
 
 ## Requirements
 
-- Python 3.10 or newer
-- `pip` (included with standard Python installations)
+- Python 3.12 or newer (Django 6.1 supports Python 3.12, 3.13 and 3.14)
+- `pip`
 - Git
+- An internet connection when using the dashboard or the marketplace weather alert (weather data, map tiles and the Leaflet library are loaded from external services)
+- Node.js, only if you want to run the dashboard's JavaScript tests (optional)
 
 ## Project structure
 
-The repository root should contain the Django project's `manage.py` file:
-
-```text
+```
 GoldShip/
-├── manage.py
 ├── README.md
 ├── requirements.txt
-├── Smolpage/
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-└── pages/
-    ├── views.py
-    ├── urls.py
-    ├── templates/
-    │   └── pages/
-    │       ├── base.html
-    │       ├── home.html
-    │       └── about.html
-    └── static/
-        └── pages/
-            └── style.css
+├── .gitignore
+└── NetAgri/
+    ├── manage.py
+    ├── .env                      # local settings, NOT committed
+    ├── Smolpage/                 # project settings and root URLs
+    │   ├── settings.py
+    │   ├── urls.py
+    │   ├── asgi.py
+    │   └── wsgi.py
+    ├── pages/                    # home, about, register, dashboard
+    │   ├── views.py
+    │   ├── urls.py
+    │   ├── forms.py              # registration form with email
+    │   ├── regions.py            # North East places and coordinates
+    │   ├── climate_service.py    # server-side weather fetch and rating
+    │   ├── templates/pages/      # base.html, home.html, about.html,
+    │   │                         # register.html, dashboard.html, login
+    │   └── static/pages/         # style.css, dashboard.css,
+    │                             # dashboard.js, climate.js, climate.test.js
+    ├── marketplace/              # crops, regions, inquiries
+    │   ├── models.py             # Region, CropListing, Inquiry
+    │   ├── views.py
+    │   ├── forms.py
+    │   ├── urls.py
+    │   ├── weather.py            # cached region weather alert
+    │   ├── management/commands/seed_regions.py
+    │   ├── migrations/
+    │   └── templates/marketplace/
+    └── resources/                # storage, transport, farming tips
+        ├── models.py             # StorageFacility, TransportOffer, FarmingTip
+        ├── views.py
+        ├── urls.py
+        └── templates/resources/
 ```
 
-Django creates additional files inside `Smolpage/` and `pages/`; they are omitted from this overview for readability.
+Django creates additional files inside each app (for example `apps.py` and `__init__.py`); they are omitted here for readability.
+
+## Pages and URLs
+
+| URL | What it does | Login needed |
+|---|---|---|
+| `/` | Home page | No |
+| `/about/` | About page | No |
+| `/dashboard/` | Weather and climate dashboard with map | No |
+| `/register/` | Create an account | No |
+| `/accounts/login/` | Log in | No |
+| `/crops/` | Browse crops (`?region=<id>&q=<text>`) | No |
+| `/crops/add/` | Add a crop listing | Yes |
+| `/crops/mine/` | Manage your own listings | Yes |
+| `/crops/listing/<id>/edit/` | Edit your listing | Yes (owner only) |
+| `/crops/listing/<id>/sold/` | Mark your listing as sold (POST only) | Yes (owner only) |
+| `/crops/listing/<id>/inquire/` | Send an inquiry about a listing | Yes |
+| `/crops/inquiries/` | Inquiries you sent and received | Yes |
+| `/crops/inquiries/<id>/respond/` | Accept or decline an inquiry (POST only) | Yes (seller only) |
+| `/resources/storage/` | Storage facility directory | No |
+| `/resources/transport/` | Transport offers | No |
+| `/resources/tips/` | Farming tips | No |
+| `/admin/` | Django Admin | Staff account |
+
+## Data model
+
+- **Region**: name, district (optional), state, latitude and longitude. Loaded from `pages/regions.py` by the `seed_regions` command.
+- **CropListing**: seller, region, crop name, variety, quantity (kg), price per kg, status (available or sold), created time.
+- **Inquiry**: buyer, listing, requested quantity (kg), message, status (pending, accepted or declined), created time.
+- **StorageFacility**: name, type, region, capacity, contact, notes.
+- **TransportOffer**: provider, origin region, destination region, vehicle type, capacity, available-from date, contact, notes.
+- **FarmingTip**: crop name, optional region, season, content, required source URL, updated time.
 
 ## Setup
 
@@ -66,8 +143,6 @@ Django creates additional files inside `Smolpage/` and `pages/`; they are omitte
 git clone https://github.com/bum-head/GoldShip.git
 cd GoldShip
 ```
-
-Run the following commands from the directory containing `manage.py`.
 
 ### 2. Create and activate a virtual environment
 
@@ -87,93 +162,179 @@ py -m venv .venv
 
 ### 3. Install dependencies
 
+Run this from the repository root, where `requirements.txt` lives:
+
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-### 4. Check the project and set up the local database
+### 4. Create your local settings file
+
+The project reads its secret key and debug flag from a `.env` file inside `NetAgri/`. Without it, Django refuses to start with `Set the SECRET_KEY environment variable`.
+
+On Linux or macOS:
+
+```bash
+cd NetAgri
+printf 'DEBUG=True\nSECRET_KEY=%s\n' "$(python -c 'import secrets; print(secrets.token_urlsafe(50))')" > .env
+```
+
+On Windows, generate a key with `python -c "import secrets; print(secrets.token_urlsafe(50))"`, then create `NetAgri\.env` containing these two lines:
+
+```
+DEBUG=True
+SECRET_KEY=paste-the-generated-key-here
+```
+
+Supported settings:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `SECRET_KEY` | none, required | Django's signing key. Every machine should have its own. |
+| `DEBUG` | `False` | Use `True` for local development only. |
+| `ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated hosts the site may be served on. |
+
+Never commit `.env`. It is listed in `.gitignore`.
+
+### 5. Check the project and set up the database
+
+Run the following from the `NetAgri/` directory (the one containing `manage.py`):
 
 ```bash
 python manage.py check
 python manage.py migrate
+python manage.py seed_regions
+python manage.py createsuperuser
 ```
 
-The `migrate` command creates Django's standard local database tables. With Django's default settings, the project uses SQLite and does not need a separately running database server.
+- `migrate` creates all tables in a local SQLite file, `db.sqlite3`.
+- `seed_regions` loads the North East places and coordinates into the `Region` table. Without it, the region dropdowns are empty. It is safe to run more than once.
+- `createsuperuser` creates the administrator account for `/admin/`.
 
-### 5. Start the development server
+### 6. Start the development server
 
 ```bash
 python manage.py runserver
 ```
 
-Open <http://127.0.0.1:8000/> in your browser.
+Open <http://127.0.0.1:8000/> in your browser. Stop the server with `Ctrl+C`.
 
-Available pages:
+### 7. Add sample data (recommended)
 
-- Home: <http://127.0.0.1:8000/>
-- About: <http://127.0.0.1:8000/about/>
-- Django Admin: <http://127.0.0.1:8000/admin/> (requires creating an administrator account first)
+A fresh database is empty. Log in at <http://127.0.0.1:8000/admin/> and add:
 
-To create an administrator account, run:
+- A few crop listings in different regions (or register test users and add them through the site)
+- A storage facility and a transport offer
+- Farming tips. Each needs a source URL. Use real guidance from agricultural extension sources such as ICAR institutes or the local Krishi Vigyan Kendra. Do not invent doses or practices.
 
-```bash
-python manage.py createsuperuser
-```
+Give your test users an email address in Django Admin, otherwise the contact line after an accepted inquiry shows "(no email on file)".
 
-Stop the development server with `Ctrl+C`.
+## How the weather features work
 
-## Dependencies
+There are two separate weather implementations:
 
-The current site only needs Django as an external Python package. Python includes SQLite support, and HTML/CSS do not require separate Python packages.
+1. **Dashboard** (`/dashboard/`): the page's JavaScript (`pages/static/pages/climate.js` and `dashboard.js`) fetches forecast and flood data directly from public weather APIs in the browser. It also caches the last result locally in the browser.
+2. **Marketplace alert**: when you filter `/crops/` by region, the server (`pages/climate_service.py`, `marketplace/weather.py`) fetches the **current conditions** for that region's coordinates from Open-Meteo, rates them from Good to Bad, and caches the result for 10 minutes. If the weather service is unavailable, the alert is simply hidden.
 
-The `requirements.txt` file should list the Django version/dependency range used by the project. Update it whenever dependencies change so teammates can install the same project requirements.
+The two use different data and scoring, so they can disagree. Merging them into one approach is a planned improvement.
+
+The server-side rating starts at 100 and subtracts points for temperature outside 15 to 30 °C, wind above 15 km/h, precipitation, very high or low humidity, and the weather condition code. Scores of 80 or more are Good, 60 to 79 Fair, 40 to 59 Poor, and below 40 Bad.
 
 ## Running tests
 
-Run Django's test runner with:
+From `NetAgri/`:
 
 ```bash
 python manage.py test
 ```
 
-The current basic site does not yet have a dedicated automated test suite; this command will run any tests added to the project.
+This runs the Python test suites for the marketplace (region filter, inquiries, seller permissions), registration, and the climate rating.
 
-## Basic work setup
+The dashboard's JavaScript has its own tests, which need Node.js:
 
-1. Pull the latest changes from GitHub.
-2. Activate your virtual environment.
-3. Install any updated dependencies with `python -m pip install -r requirements.txt`.
-4. Apply new database migrations with `python manage.py migrate`.
-5. Start the site with `python manage.py runserver`.
+```bash
+node pages/static/pages/climate.test.js
+```
 
-Commit Django migration files if database models are added later. Do not commit your virtual environment, local secrets, or local database contents.
+
+## Rules regarding contributing:
+- Commit Django migration files whenever you change a model.
+- Do not commit `.env`, your virtual environment, `db.sqlite3`, or `__pycache__` folders. Each developer has their own local database.
+- Work on a branch and open a pull request instead of pushing to `master` directly.
+
+If you had a copy of this repository from before the database file was removed from version control, pulling may delete your local `db.sqlite3`. Copy it somewhere first if it holds data you need, then run `migrate`, `seed_regions` and `createsuperuser` again.
+
+## Dependencies
+
+`requirements.txt` pins exact versions, including Django 6.1.2 and `django-environ` (for reading `.env`). It also lists several packages the current code does not appear to use, such as `pandas`, `numpy`, `pydantic`, `pillow` and `psycopg`. They are harmless but slow down installation, and they can be pruned once the team confirms nothing needs them. Update `requirements.txt` whenever a dependency is added or removed.
 
 ## Troubleshooting
 
+### `Set the SECRET_KEY environment variable`
+
+The `.env` file is missing or in the wrong folder. It must be at `NetAgri/.env`, next to `manage.py`, not in the repository root. See step 4 of Setup.
+
+### `no such table: ...` (for example `auth_user` or `marketplace_region`)
+
+The database has not been migrated. From `NetAgri/`, run `python manage.py migrate`.
+
+### The region dropdown is empty
+
+Run `python manage.py seed_regions`.
+
 ### `python: command not found`
 
-Depending on your operating system, try `python3` instead of `python`.
+Depending on your operating system, use `python3` instead of `python`.
 
 ### Django cannot be imported
 
-Make sure your virtual environment is activated and install dependencies again:
+Make sure your virtual environment is activated, then reinstall dependencies from the repository root:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### The CSS does not load
+### `Could not open requirements file`
 
-Check that the stylesheet is located at `pages/static/pages/style.css`, that the template loads Django's static tag library, and that the base template links to `pages/style.css` using the `{% static %}` template tag. The development settings should include `django.contrib.staticfiles` and `DEBUG = True`.
+Run the install command from the repository root, where `requirements.txt` is located, not from inside `NetAgri/`.
+
+### The dashboard shows no map, or the dropdowns do nothing
+
+- Check your internet connection. The map library and tiles load from external servers.
+- Hard refresh the page (Ctrl+Shift+R).
+- Open the browser developer tools (F12) and look at the Console and Network tabs for errors or files returning 404 or 403.
+- Map tiles can be blocked if Django does not send a referrer. `Smolpage/settings.py` sets `SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'` for this reason, so do not remove it.
+
+### The CSS or JavaScript does not load
+
+Static files are served by Django's development server only when `DEBUG=True`. Check your `.env` file. Files live under `pages/static/pages/`.
+
+### The marketplace weather alert does not appear
+
+The alert shows only after you choose a region. The region must have coordinates (run `seed_regions`) and the server must be able to reach the weather service. If the service is down, the alert is hidden on purpose.
+
+### "(no email on file)" after accepting an inquiry
+
+The user has no email address. New registrations require one. For older accounts, add an email in Django Admin.
 
 ### The server reports a database connection error
 
-The current basic site is intended to use Django's default SQLite configuration. Check the `DATABASES` setting in `Smolpage/settings.py`. If it has been configured for PostgreSQL, PostgreSQL must be running and the configured database credentials must be valid; otherwise restore the default SQLite configuration for local development.
+The project is intended to use the default SQLite configuration. Check the `DATABASES` setting in `Smolpage/settings.py`.
 
 ## Project status and next steps
 
->This is an early-stage project. The immediate goal is to maintain a working, well-documented Django foundation. Potential future features include user accounts, crop listings, regional filtering, buyer-seller inquiries, agricultural guidance, and weather information. These features should be described as implemented only after they are present in the code.
+The project covers the core journey: a user registers, a seller lists a crop, a buyer finds it by region, sees current weather for the area, and sends an inquiry that the seller can accept. Directories for storage and transport and a sourced farming-tips page are in place.
+
+Planned next steps:
+- Merging the dashboard and marketplace weather logic into one approach
+- Buyer and seller roles
+- Stock handling when inquiries are accepted
+- Storage and transport booking
+- A production deployment configuration (HTTPS, real email backend, production database)
+- Pruning unused dependencies
+
+Features should be described as implemented only after they exist in the code.
 
 ## License
 
