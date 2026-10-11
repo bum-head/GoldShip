@@ -73,6 +73,10 @@ class CropListing(models.Model):
     def __str__(self):
         return f"{self.crop_name} - {self.region}"
 
+    @property
+    def stock_value(self):
+        return self.quantity_kg * self.price_per_kg
+
 class Inquiry(models.Model):
     STATUS_CHOICES = [
         ("pending", "Pending"),
@@ -104,3 +108,7 @@ class Inquiry(models.Model):
 
     def __str__(self):
         return f"{self.buyer} → {self.listing.crop_name} ({self.status})"
+
+    @property
+    def total_value(self):
+        return self.quantity_kg * self.listing.price_per_kg

@@ -3,6 +3,11 @@
 {% block content %}
 <h1>My listings</h1>
 <p><a href="{% url 'marketplace:create_listing' %}">Add a crop</a></p>
+<p class="problem-card">
+    Active stock value: ₹{{ active_value|floatformat:2 }}<br>
+    Accepted inquiries: ₹{{ accepted_value|floatformat:2 }}
+    <small>(agreements to talk, not confirmed sales, and not deducted from stock)</small>
+</p>
 
 {% for l in listings %}
     <article class="crop-card">

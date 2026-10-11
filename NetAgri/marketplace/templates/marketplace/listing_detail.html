@@ -4,6 +4,16 @@
 <h1>{{ listing.crop_name }}{% if listing.variety %} ({{ listing.variety }}){% endif %}</h1>
 <p>{{ listing.quantity_kg }} kg at ₹{{ listing.price_per_kg }}/kg · {{ listing.region }} · {{ listing.get_status_display }}</p>
 <p>Seller: {{ listing.seller.username }}</p>
+<p>Value of this stock at the asking price: ₹{{ listing.stock_value|floatformat:2 }}</p>
+{% if price %}
+<p class="problem-card">
+    <strong>Price check:</strong> ₹{{ listing.price_per_kg }}/kg is {{ price.verdict }} the median asking price of
+    ₹{{ price.median|floatformat:2 }}/kg ({{ price.n }} other listings in {{ price.scope }}, including sold ones).
+    These are asking prices, not market rates.
+</p>
+{% else %}
+<p><small>Not enough similar listings to compare prices yet.</small></p>
+{% endif %}
 
 {% if user.is_authenticated and user != listing.seller and listing.status == "active" %}
     <p><a href="{% url 'marketplace:create_inquiry' listing.pk %}">Contact seller</a></p>

@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
@@ -9,6 +11,7 @@ from .models import CropListing, Inquiry, Region
 from resources.models import StorageFacility, TransportOffer
 
 from .geo import haversine_km
+from .pricing import price_context
 from .weather import region_alert
 
 
@@ -56,7 +59,15 @@ def create_listing(request):
 @login_required
 def my_listings(request):
     listings = CropListing.objects.filter(seller=request.user).select_related("region")
-    return render(request, "marketplace/my_listings.html", {"listings": listings})
+    listings = list(listings)
+    active_value = sum((l.stock_value for l in listings if l.status == "active"), Decimal("0"))
+    accepted = Inquiry.objects.filter(listing__seller=request.user, status="accepted").select_related("listing")
+    accepted_value = sum((i.total_value for i in accepted), Decimal("0"))
+    return render(request, "marketplace/my_listings.html", {
+        "listings": listings,
+        "active_value": active_value,
+        "accepted_value": accepted_value,
+    })
 
 
 @login_required
@@ -158,6 +169,7 @@ def listing_detail(request, pk):
     return render(request, "marketplace/listing_detail.html", {
         "listing": listing,
         "alert": region_alert(listing.region),
+        "price": price_context(listing),
         "storage": storage[:5],
         "transport": transport[:5],
         "radius": NEARBY_KM,

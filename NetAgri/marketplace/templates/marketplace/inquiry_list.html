@@ -6,7 +6,7 @@
 <h2>Received (for your crops)</h2>
 {% for i in received %}
     <article class="crop-card">
-        <h3>{{ i.listing.crop_name }}: {{ i.quantity_kg }} kg</h3>
+        <h3>{{ i.listing.crop_name }}: {{ i.quantity_kg }} kg · ₹{{ i.total_value|floatformat:2 }}</h3>
         <p>From {{ i.buyer.username }} · {{ i.get_status_display }}</p>
         {% if i.message %}<p>{{ i.message }}</p>{% endif %}
         {% if i.status == "pending" %}
@@ -26,7 +26,7 @@
 <h2>Sent</h2>
 {% for i in sent %}
     <article class="crop-card">
-        <h3>{{ i.listing.crop_name }}: {{ i.quantity_kg }} kg</h3>
+        <h3>{{ i.listing.crop_name }}: {{ i.quantity_kg }} kg · ₹{{ i.total_value|floatformat:2 }}</h3>
         <p>{{ i.listing.region }} · {{ i.get_status_display }}</p>
         {% if i.status == "accepted" %}
         <p><strong>Seller contact:</strong> {{ i.listing.seller.email|default:"(no email on file)" }}</p>

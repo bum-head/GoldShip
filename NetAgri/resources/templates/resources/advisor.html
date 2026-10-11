@@ -1,0 +1,20 @@
+{% extends "pages/base.html" %}
+{% block title %}AI advisor | NetAgri{% endblock %}
+{% block content %}
+<h1>AI advisor</h1>
+<p>Ask about sowing, harvest or selling. Answers use this region's historical climate and local asking prices. They are suggestions, not forecasts or guarantees.</p>
+<form method="post">
+    {% csrf_token %}
+    <select name="region">
+        <option value="">Choose a region</option>
+        {% for r in regions %}
+            <option value="{{ r.pk }}" {% if form.region == r.pk|stringformat:"s" %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+    </select>
+    <input name="crop" placeholder="Crop (optional)" value="{{ form.crop }}">
+    <textarea name="question" maxlength="500" placeholder="e.g. When should I sow rice?">{{ form.question }}</textarea>
+    <button type="submit">Ask</button>
+</form>
+{% if error %}<p>{{ error }}</p>{% endif %}
+{% if answer %}<div class="problem-card">{{ answer|linebreaks }}</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "pages/base.html" %}
+{% block title %}Climate trends | NetAgri{% endblock %}
+{% block content %}
+<h1>Climate trends</h1>
+<p>Typical rainfall and temperature by month over the last five full years, to help plan sowing, harvest and transport. This is modelled historical data for the area around the place's coordinates, not station measurements and not a forecast.</p>
+
+<form method="get">
+    <select name="region">
+        <option value="">Choose a region</option>
+        {% for r in regions %}
+            <option value="{{ r.pk }}" {% if selected == r.pk %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Show</button>
+</form>
+
+{% if error %}<p>{{ error }}</p>{% endif %}
+{% if rows %}
+<h2>{{ region }}: average by month</h2>
+<table>
+    <tr><th>Month</th><th>Avg temp (°C)</th><th>Avg rainfall (mm)</th><th></th></tr>
+    {% for r in rows %}
+    <tr>
+        <td>{{ r.month }}</td>
+        <td>{{ r.temp|default_if_none:"–" }}</td>
+        <td>{{ r.rain|default_if_none:"–" }}</td>
+        <td><div style="background:#267447;height:10px;width:{{ r.pct }}%;min-width:2px"></div></td>
+    </tr>
+    {% endfor %}
+</table>
+<h3>Total rainfall by year (mm)</h3>
+<p>{% for a in annual %}{{ a.year }}: {{ a.rain }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+{% endif %}
+{% endblock %}
